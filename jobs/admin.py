@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .forms import CompanyForm, IndustryForm, InterviewForm, JobForm
+from .forms import CompanyForm
 from .models import Company, Industry, Interview, Interviewer, Job
 
 
