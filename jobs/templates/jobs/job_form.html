@@ -1,0 +1,9 @@
+<h2>{% if form.initial.applied_date %}Add Job for {{ form.initial.applied_date }}{% else %}Add New Job{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Job</button>
+</form>
+
+<a href="{% url 'job_calendar' %}">Cancel and Return to Calendar</a>

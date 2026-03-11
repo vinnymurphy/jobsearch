@@ -1,0 +1,7 @@
+black
+Django
+ipython
+isort
+ruff
+sourcery-cli
+weasyprint
