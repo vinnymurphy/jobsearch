@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <style>
+        .calendar { width: 98%; margin: auto; border-collapse: collapse; }
+        .calendar th { padding: 10px; background: #f4f4f4; text-align: center; }
+        .calendar td {
+            width: 14%; height: 120px; border: 1px solid #ddd;
+            vertical-align: top; padding: 5px;
+        }
+        .date { font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 5px; }
+        .calendar-event {
+            background-color: #007bff; color: white; padding: 2px 4px;
+            border-radius: 3px; font-size: 0.85em; margin-bottom: 3px;
+            list-style-type: none;
+        }
+        ul { padding: 0; margin: 0; }
+    </style>
+  </head>
+<body>
+  <h2>Interview Calendar</h2>
+      {{ calendar }}
+</body>
+
+</html>

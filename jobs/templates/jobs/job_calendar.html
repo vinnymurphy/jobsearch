@@ -1,0 +1,96 @@
+<html>
+  <head>
+    <style>
+        .calendar { width: 98%; margin: auto; border-collapse: collapse; }
+        .calendar th { padding: 10px; background: #f4f4f4; text-align: center; }
+        .calendar td {
+            width: 14%; height: 120px; border: 1px solid #ddd;
+            vertical-align: top; padding: 5px;
+        }
+        .date {
+            font-weight: bold; font-size: 1.2em; display: block; margin-bottom: 5px;
+        }
+        .calendar-event {
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+        }
+        .calendar-event:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            filter: brightness(95%);
+            cursor: pointer;
+        }
+        /* Ensure the link covers the entire list item area */
+        .calendar-event a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #444;
+        }
+        .box {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            margin-right: 8px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        @media print {
+            @page {
+                size: letter landscape;
+                margin: 0.5in;
+            }
+            .btn-print, .nav-links { display: none; } /* Hide buttons on the actual PDF */
+            .calendar { width: 100%; border-collapse: collapse; }
+        }
+        .date-link {
+            text-decoration: none;
+            color: #666;
+            font-weight: bold;
+            display: block;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .date-link:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+  </head>
+<body>
+  <div class="calendar-navigation" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <a class="btn" href="?{{ prev_month }}">« Previous Month</a>
+
+    <h3>{{ date|date:"F Y" }}</h3>
+
+    <a class="btn" href="?{{ next_month }}">Next Month »</a>
+  </div>
+  <h2>Job Calendar</h2>
+  {{ calendar }}
+  <div class="calendar-legend">
+    <div class="legend-item"><span class="box bg-open"></span> Open / Applied</div>
+    <div class="legend-item"><span class="box bg-draft"></span> Draft / Not Started</div>
+    <div class="legend-item"><span class="box bg-closed"></span> Closed / Rejected</div>
+    <div class="legend-item"><span class="box bg-interview"></span> Scheduled Interview</div>
+</div>
+
+</body>
+
+</html>
