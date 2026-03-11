@@ -1,12 +1,48 @@
-# jobsearch
-help track jobsearches along with interviews.
+# JobSearch
 
-# running Django we needed a few Fedora libraries and also needed to change the venv.  This is to export to pdf (WIP)
-```
-# Install system dependencies
+A streamlined Django application to track the lifecycle of your job search, from initial application to final interview.
+
+## 🚀 Getting Started
+
+### Prerequisites (Fedora)
+To support **PDF Exporting** via WeasyPrint, you must install the following system dependencies:
+
+```bash
 sudo dnf install pango-devel cairo-devel gdk-pixbuf2-devel libffi-devel
+```
+### Clone the repository
+```bash
+git clone git@github.com:vinnymurphy/jobsearch.git
+```
 
-# Install the Python package
-pip install weasyprint
+### Setup the virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install weasyprint  # actually this is in requirements.txt, but just to be safe I added it
+```
 
+## 📊 Data Model
+
+The application uses a relational structure to track the progression from lead to interview.
+
+### Relational Overview
+* **Industry** ↔ **Company**: One-to-Many (Companies are categorized by industry).
+* **Company** ↔ **Job**: One-to-Many (A company can have multiple roles you are tracking).
+* **Job** ↔ **Interview**: One-to-Many (A single job application can have multiple interview rounds).
+* **Interviewer** ↔ **Interview**: Many-to-One (Tracking who you spoke with during each round).
+
+### Schema Diagram
+The relationship flow follows this logic:
+`Industry` ➔ `Company` ➔ `Job` ➔ `Interview` ➔ `Interviewer`
+
+```mermaid
+graph TD
+    A[Industry] --> B[Company]
+    B --> C[Job]
+    C --> D[Interview]
+    E[Interviewer] --> D
+    F[JobCalendar] --> G[PDF_Export]
+    G -.-> H[WeasyPrint]
 ```
