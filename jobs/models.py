@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import slugify
 from django.urls import reverse
 from django.utils.text import slugify
 
@@ -122,6 +121,7 @@ class Job(models.Model):
     application_link = models.URLField(blank=True)
 
     slug = models.SlugField(unique=True, blank=True)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(f"{self.company}-{self.title}")

@@ -65,10 +65,11 @@ class InterviewCalendar(calendar.HTMLCalendar):
             d += f"<li class='calendar-event {color_class}'><a href='{url}'>{company_name}</a> ({title})</li>"
         print(f"{day=}")
         if day != 0:
-            return("<td>"
-             f"<a href='{url}' class='date-link' title='Add job for this day'>{day}</a>"
-             f"<ul> {d} </ul>"
-             "</td>"
+            return (
+                "<td>"
+                f"<a href='{url}' class='date-link' title='Add job for this day'>{day}</a>"
+                f"<ul> {d} </ul>"
+                "</td>"
             )
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"
@@ -87,12 +88,12 @@ class InterviewCalendar(calendar.HTMLCalendar):
             scheduled_time__year=self.year, scheduled_time__month=self.month
         )
 
-        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
+        cal = '<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f"{self.formatweek(week, events)}\n"
-        cal += f"</table>"
+        cal += "</table>"
         return cal
 
 
@@ -107,18 +108,9 @@ class JobCalendar(calendar.HTMLCalendar):
     def formatday(self, day, events):
         events_per_day = events.filter(created_at__day=day)
         d = ""
-        STATUS_CLASSES = {
-            "open": "bg-open",
-            "closed": "bg-closed",
-            "draft": "bg-draft",
-            "applied": "bg-open",  # You can map multiple statuses to one color
-            "rejected": "bg-closed",
-        }
+
         for event in events_per_day:
             url = reverse("job_detail", args=[event.id])
-            current_status = event.status.lower() if event.status else "draft"
-            color_class = STATUS_CLASSES.get(current_status, "bg-draft")
-
             company_name = (
                 event.company.name if event.company else "Unknown Company"
             )
@@ -143,10 +135,10 @@ class JobCalendar(calendar.HTMLCalendar):
             created_at__year=self.year, created_at__month=self.month
         )
 
-        cal = f'<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
+        cal = '<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
         cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f"{self.formatweek(week, events)}\n"
-        cal += f"</table>"
+        cal += "</table>"
         return cal
