@@ -1,13 +1,12 @@
 from typing import Any
 
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
+from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views import generic
-from django.template.loader import render_to_string
-from django.http import HttpRequest, HttpResponse
 from weasyprint import HTML
-from django.urls import reverse_lazy
-
 
 from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
 from .models import Interview, Job
@@ -47,6 +46,7 @@ def create_job(request):
         form = JobForm()
     return render(request, "jobs/create_job.html", {"form": form})
 
+
 class JobCreateView(generic.CreateView):
     model = Job
     form_class = JobForm
@@ -57,7 +57,7 @@ class JobCreateView(generic.CreateView):
         initial = super().get_initial()
         date_str = self.kwargs.get("date")
         if date_str:
-            initial['applied_date'] = get_date(date_str)
+            initial["applied_date"] = get_date(date_str)
         return initial
 
 
