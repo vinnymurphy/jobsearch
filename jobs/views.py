@@ -1,10 +1,13 @@
+from datetime import datetime, timedelta
 from typing import Any
 
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.views import generic
 from weasyprint import HTML
 
@@ -17,6 +20,24 @@ from .utils import (
     next_month,
     prev_month,
 )
+
+
+def dashboard_view(request):
+    # Aggregate job counts by company
+    performance_data = (
+        Job.objects.values("company__name")
+        .annotate(total=Count("id"))
+        .order_by("-total")
+    )
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    recent_velocity = Job.objects.filter(created_at__gte=seven_days_ago).count()
+
+    context = {
+        "labels": [item["company__name"] for item in performance_data],
+        "counts": [item["total"] for item in performance_data],
+        "recent_velocity": recent_velocity,
+    }
+    return render(request, "jobs/dashboard.html", context)
 
 
 def export_calendar_pdf(request, year, month):
@@ -107,8 +128,9 @@ class JobView(generic.ListView):
 
         # mark_safe tells Django to render the HTML string as actual HTML
         context["calendar"] = mark_safe(html_cal)
-        context["prev_month"] = prev_month(d)
-        context["next_month"] = next_month(d)
+        now = datetime.now()
+        context["year"] = now.year
+        context["month"] = now.month
         return context
 
     def post(self, request, *args, **kwargs):
