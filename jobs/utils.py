@@ -142,3 +142,4 @@ class JobCalendar(calendar.HTMLCalendar):
             cal += f"{self.formatweek(week, events)}\n"
         cal += "</table>"
         return cal
+
