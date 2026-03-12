@@ -46,6 +46,7 @@
         {% endblock %}
     </div>
 </div>
+
 <footer class="container-fluid text-center mt-5 border-top pt-4">
   <div class="row">
     <div class="col-sm-6 text-md-start text-muted">
@@ -61,6 +62,12 @@
         {% endif %}
       </small>
     </div>
+  </div>
+  <div class="col-sm-12 text-center text-muted mt-2">
+    <small>
+      <span class="badge bg-info text-dark">Total Applications: {{ total_jobs }}</span>
+      <span class="badge bg-secondary">Target Companies: {{ total_companies }}</span>
+    </small>
   </div>
 </footer>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
