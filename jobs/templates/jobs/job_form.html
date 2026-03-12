@@ -1,3 +1,13 @@
+
+{% extends "base.html" %}
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="{% url 'job_calendar' %}">Calendar</a></li>
+<li class="breadcrumb-item active" aria-current="page">
+    {% if object %}Edit Job{% else %}Add Application{% endif %}
+</li>
+{% endblock %}
+{% block content %}
+
 <h2>{% if form.initial.applied_date %}Add Job for {{ form.initial.applied_date }}{% else %}Add New Job{% endif %}</h2>
 
 <form method="post">
@@ -7,3 +17,12 @@
 </form>
 
 <a href="{% url 'job_calendar' %}">Cancel and Return to Calendar</a>
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Re-init your Select2 autocomplete here
+        $('.select2-enable').select2({ width: '100%' });
+    });
+</script>
+{% endblock %}
