@@ -1,8 +1,9 @@
 from django.urls import path
 
-from .views import InterviewView, JobCreateView, JobDetailView, JobView, export_calendar_pdf
+from .views import InterviewView, JobCreateView, JobDetailView, JobView, export_calendar_pdf, dashboard_view
 
 urlpatterns = [
+    path("", dashboard_view, name="dashboard"),
     path("interviews/", InterviewView.as_view(), name="interview_calendar"),
     path("jobs/", JobView.as_view(), name="job_calendar"),
     path("job/<int:pk>/", JobDetailView.as_view(), name="job_detail"),
