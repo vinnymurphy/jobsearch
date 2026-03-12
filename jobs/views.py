@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -68,11 +69,20 @@ def create_job(request):
     return render(request, "jobs/create_job.html", {"form": form})
 
 
-class JobCreateView(generic.CreateView):
+class JobCreateView(SuccessMessageMixin, generic.CreateView):
     model = Job
     form_class = JobForm
     template_name = "jobs/job_form.html"
     success_url = reverse_lazy("job_calendar")
+
+    success_message = "Job for %(title)s at %(company)s created successfully!"
+
+    def get_success_message(self, cleaned_data):
+        # This allows you to use dynamic data in the message
+        return self.success_message % dict(
+            cleaned_data,
+            company=self.object.company.name,
+        )
 
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
