@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import InterviewView, JobCreateView, JobDetailView, JobView
+from .views import InterviewView, JobCreateView, JobDetailView, JobView, export_calendar_pdf
 
 urlpatterns = [
     path("interviews/", InterviewView.as_view(), name="interview_calendar"),
@@ -12,4 +12,5 @@ urlpatterns = [
         JobCreateView.as_view(),
         name="job_create_with_date",
     ),
+    path("export/pdf/<int:year>/<int:month>/", export_calendar_pdf, name="export_pdf"),
 ]

@@ -90,6 +90,11 @@
     <div class="legend-item"><span class="box bg-closed"></span> Closed / Rejected</div>
     <div class="legend-item"><span class="box bg-interview"></span> Scheduled Interview</div>
 </div>
+<div style="margin-top: 20px; text-align: right;">
+    <a href="{% url 'export_pdf' year=year month=month %}" class="btn-print">
+        🖨️ Download PDF Schedule
+    </a>
+</div>
 
 </body>
 
