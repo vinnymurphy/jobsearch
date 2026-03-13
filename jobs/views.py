@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views import generic
 from weasyprint import HTML
 
@@ -31,7 +31,9 @@ def dashboard_view(request):
         .order_by("-total")
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
-    recent_velocity = Job.objects.filter(created_at__gte=seven_days_ago).count()
+    recent_velocity = Job.objects.filter(
+        created_at__gte=seven_days_ago
+    ).count()
 
     context = {
         "labels": [item["company__name"] for item in performance_data],
@@ -126,21 +128,49 @@ class JobView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Get current year and month
-        req_month = self.request.GET.get("month", None)
-        d = get_date(req_month)
+        today = date.today()
+        try:
+            year = int(self.request.GET.get("year", today.year))
+            month = int(self.request.GET.get("month", today.month))
+            if month < 1 or month > 12:
+                raise ValueError
+        except (ValueError, TypeError):
+            year = today.year
+            month = today.month
+        first_day_of_month = date(year, month, 1)
+        prev_month_date = first_day_of_month - timedelta(days=1)
+        next_month_date = first_day_of_month + timedelta(days=32)
+        jobs = Job.objects.filter(
+            created_at__year=year, created_at__month=month
+        )
+        interviews = Interview.objects.filter(
+            scheduled_time__year=year, scheduled_time__month=month
+        )
+        jobs_by_day = {}
+        for job in jobs:
+            d = job.created_at.day
+            jobs_by_day.setdefault(d, []).append(job)
 
-        # Instantiate our calendar class
-        cal = JobCalendar(d.year, d.month)
+        interviews_by_day = {}
+        for interview in interviews:
+            d = interview.scheduled_time.day
+            interviews_by_day.setdefault(d, []).append(interview)
 
-        # Call the formatmonth method, which returns our HTML as a string
-        html_cal = cal.formatmonth(withyear=True)
-
-        # mark_safe tells Django to render the HTML string as actual HTML
+        cal = JobCalendar(year, month)
+        html_cal = cal.formatmonth(
+            year,
+            month,
+            withyear=True,
+            jobs=jobs_by_day,
+            interviews=interviews_by_day,
+        )
         context["calendar"] = mark_safe(html_cal)
-        now = datetime.now()
-        context["year"] = now.year
-        context["month"] = now.month
+        context["prev_year"] = prev_month_date.year
+        context["prev_month"] = prev_month_date.month
+        context["next_year"] = next_month_date.year
+        context["next_month"] = next_month_date.month
+        context["year"] = year
+        context["month"] = month
         return context
 
     def post(self, request, *args, **kwargs):
@@ -152,6 +182,12 @@ class JobView(generic.ListView):
             interview.save()
             return redirect("job_detail", pk=self.object.pk)
         return self.render_to_response(self.get_context_data(form=form))
+
+
+class InterviewDetailView(generic.DetailView):
+    model = Interview
+    template_name = "jobs/interview_detail.html"
+    context_object_name = "interview"
 
 
 class JobDetailView(generic.DetailView):
