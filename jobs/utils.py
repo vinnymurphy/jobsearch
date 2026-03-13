@@ -30,8 +30,6 @@ class InterviewCalendar(calendar.HTMLCalendar):
     def __init__(self, year=None, month=None):
         self.year = year
         self.month = month
-        print(f"DEBUG: {year=} {month=}")
-
         super().__init__()
 
     # formats a day as a td
@@ -39,7 +37,6 @@ class InterviewCalendar(calendar.HTMLCalendar):
     def formatday(self, day, events, interviews):
         # Filter the jobs that fall on this specific day
         events_per_day = events.filter(created_at__day=day)
-        print(f"DEBUG: {events_per_day=}")
         d = ""
 
         for event in events_per_day:
@@ -63,7 +60,6 @@ class InterviewCalendar(calendar.HTMLCalendar):
 
             # 2. Inject the color_class into the <li>
             d += f"<li class='calendar-event {color_class}'><a href='{url}'>{company_name}</a> ({title})</li>"
-        print(f"{day=}")
         if day != 0:
             return (
                 "<td>"
@@ -106,6 +102,8 @@ class JobCalendar(calendar.HTMLCalendar):
     # formats a day as a td
     # filter events by day
     def formatday(self, day, weekday, jobs, interviews):
+        if day == 0:
+            return "<td></td>"
         day_jobs = jobs.get(day, [])
         d = ""
 
@@ -117,18 +115,16 @@ class JobCalendar(calendar.HTMLCalendar):
             title = job.title
             # Add a link to the interview or just show the company name
             d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a> ({title})</li>"
-        if day != 0:
-            return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
+
         interview_days = interviews.get(day, [])
         for interview in interview_days:
-            url = reverse("interview_detail", args=[interview.id])
             company_name = (
-                interview.job.company.name
+                interview.job.company
                 if interview.job and interview.job.company
                 else "Unknown Company"
             )
             title = interview.job.title if interview.job else "Unknown Job"
-            d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a> ({title})</li>"
+            d += f"<li class='calendar-event bg-interview'>Interview: {company_name}</li>"
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"
