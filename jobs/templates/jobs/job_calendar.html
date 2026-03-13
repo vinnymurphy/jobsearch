@@ -81,11 +81,17 @@
   </head>
 <body>
   <div class="calendar-navigation" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <a class="btn" href="?{{ prev_month }}">« Previous Month</a>
+    <div class="d-flex justify-content-between mb-3">
+      <a class="btn btn-outline-primary"
+         href="?year={{ prev_year }}&month={{ prev_month }}">
+        &laquo; Previous Month
+      </a>
 
-    <h3>{{ date|date:"F Y" }}</h3>
-
-    <a class="btn" href="?{{ next_month }}">Next Month »</a>
+      <a class="btn btn-outline-primary"
+         href="?year={{ next_year }}&month={{ next_month }}">
+        Next Month &raquo;
+      </a>
+    </div>
   </div>
   <h2>Job Calendar</h2>
   {{ calendar }}

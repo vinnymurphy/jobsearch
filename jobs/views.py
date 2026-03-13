@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
@@ -126,21 +126,28 @@ class JobView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Get current year and month
-        req_month = self.request.GET.get("month", None)
-        d = get_date(req_month)
+        today = date.today()
+        try:
+            year = int(self.request.GET.get("year", today.year))
+            month = int(self.request.GET.get("month", today.month))
+            if month < 1 or month > 12:
+                raise ValueError
+        except (ValueError, TypeError):
+            year = today.year
+            month = today.month
+        first_day_of_month = date(year, month, 1)
+        prev_month_date = first_day_of_month - timedelta(days=1)
+        next_month_date = first_day_of_month + timedelta(days=32)
 
-        # Instantiate our calendar class
-        cal = JobCalendar(d.year, d.month)
-
-        # Call the formatmonth method, which returns our HTML as a string
-        html_cal = cal.formatmonth(withyear=True)
-
-        # mark_safe tells Django to render the HTML string as actual HTML
+        cal = JobCalendar(year, month)
+        html_cal = cal.formatmonth(year, month, withyear=True)
         context["calendar"] = mark_safe(html_cal)
-        now = datetime.now()
-        context["year"] = now.year
-        context["month"] = now.month
+        context["prev_year"] = prev_month_date.year
+        context["prev_month"] = prev_month_date.month
+        context["next_year"] = next_month_date.year
+        context["next_month"] = next_month_date.month
+        context["year"] = year
+        context["month"] = month
         return context
 
     def post(self, request, *args, **kwargs):

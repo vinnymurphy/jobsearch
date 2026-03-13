@@ -129,7 +129,7 @@ class JobCalendar(calendar.HTMLCalendar):
         return f"<tr> {week} </tr>"
 
     # formats a month as a table
-    def formatmonth(self, withyear=True):
+    def formatmonth(self, theyear, themonth, withyear=True, jobs=None, interviews=None):
         # Gather all interviews for the given month and year
         events = Job.objects.filter(
             created_at__year=self.year, created_at__month=self.month
@@ -142,4 +142,3 @@ class JobCalendar(calendar.HTMLCalendar):
             cal += f"{self.formatweek(week, events)}\n"
         cal += "</table>"
         return cal
-
