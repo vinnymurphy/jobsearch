@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Interview with {{ interview.job.company }}</h1>
+    <hr>
+    <p><strong>Job Title:</strong> {{ interview.job.title }}</p>
+    <p><strong>Scheduled Time:</strong> {{ interview.scheduled_time|date:"F j, Y, P" }}</p>
+    <div class="mt-4">
+        <a href="{% url 'job_calendar' %}" class="btn btn-secondary">&laquo; Back to Calendar</a>
+        <a href="{% url 'job_detail' interview.job.id %}" class="btn btn-primary">View Job Posting</a>
+    </div>
+</div>
+{% endblock %}
