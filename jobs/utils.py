@@ -118,13 +118,9 @@ class JobCalendar(calendar.HTMLCalendar):
 
         interview_days = interviews.get(day, [])
         for interview in interview_days:
-            company_name = (
-                interview.job.company
-                if interview.job and interview.job.company
-                else "Unknown Company"
-            )
-            title = interview.job.title if interview.job else "Unknown Job"
-            d += f"<li class='calendar-event bg-interview'>Interview: {company_name}</li>"
+            url = reverse("interview_detail", args=[interview.id])
+            title = interview.job.title if interview.job else "Unknown"
+            d += f"<li class='calendar-event bg-interview'><a href='{url}'>{interview}</a> ({title})</li>"
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"

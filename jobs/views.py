@@ -184,6 +184,12 @@ class JobView(generic.ListView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
+class InterviewDetailView(generic.DetailView):
+    model = Interview
+    template_name = "jobs/interview_detail.html"
+    context_object_name = "interview"
+
+
 class JobDetailView(generic.DetailView):
     model = Job
     template_name = "jobs/job_detail.html"
