@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 
 from django.urls import reverse
 
-from .models import Interview, Job
+from .models import Interview
 
 
 def get_date(req_day):
@@ -105,40 +105,55 @@ class JobCalendar(calendar.HTMLCalendar):
 
     # formats a day as a td
     # filter events by day
-    def formatday(self, day, events):
-        events_per_day = events.filter(created_at__day=day)
+    def formatday(self, day, weekday, jobs, interviews):
+        day_jobs = jobs.get(day, [])
         d = ""
 
-        for event in events_per_day:
-            url = reverse("job_detail", args=[event.id])
+        for job in day_jobs:
+            url = reverse("job_detail", args=[job.id])
             company_name = (
-                event.company.name if event.company else "Unknown Company"
+                job.company.name if job.company else "Unknown Company"
             )
-            title = event.title
+            title = job.title
             # Add a link to the interview or just show the company name
+            d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a> ({title})</li>"
+        if day != 0:
+            return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
+        interview_days = interviews.get(day, [])
+        for interview in interview_days:
+            url = reverse("interview_detail", args=[interview.id])
+            company_name = (
+                interview.job.company.name
+                if interview.job and interview.job.company
+                else "Unknown Company"
+            )
+            title = interview.job.title if interview.job else "Unknown Job"
             d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a> ({title})</li>"
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"
 
-    # formats a week as a tr
-    def formatweek(self, theweek, events):
-        week = ""
-        for d, weekday in theweek:
-            week += self.formatday(d, events)
-        return f"<tr> {week} </tr>"
+    def formatmonth(
+        self, theyear, themonth, withyear=True, jobs=None, interviews=None
+    ):
+        jobs = jobs or {}
+        interviews = interviews or {}
 
-    # formats a month as a table
-    def formatmonth(self, theyear, themonth, withyear=True, jobs=None, interviews=None):
-        # Gather all interviews for the given month and year
-        events = Job.objects.filter(
-            created_at__year=self.year, created_at__month=self.month
+        cal = '<table class="calendar">\n'
+        cal += (
+            f"{self.formatmonthname(theyear, themonth, withyear=withyear)}\n"
         )
-
-        cal = '<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
-        cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
         cal += f"{self.formatweekheader()}\n"
-        for week in self.monthdays2calendar(self.year, self.month):
-            cal += f"{self.formatweek(week, events)}\n"
+
+        # This is where we pass the data to each week
+        for week in self.monthdays2calendar(theyear, themonth):
+            cal += f"{self.formatweek(week, jobs, interviews)}\n"
         cal += "</table>"
         return cal
+
+    def formatweek(self, theweek, jobs, interviews):
+        week = ""
+        for d, weekday in theweek:
+            # And pass it to each day
+            week += self.formatday(d, weekday, jobs, interviews)
+        return f"<tr> {week} </tr>"

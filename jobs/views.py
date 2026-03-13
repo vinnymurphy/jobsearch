@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,8 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.safestring import mark_safe
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views import generic
 from weasyprint import HTML
 
@@ -31,7 +31,9 @@ def dashboard_view(request):
         .order_by("-total")
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
-    recent_velocity = Job.objects.filter(created_at__gte=seven_days_ago).count()
+    recent_velocity = Job.objects.filter(
+        created_at__gte=seven_days_ago
+    ).count()
 
     context = {
         "labels": [item["company__name"] for item in performance_data],
@@ -138,9 +140,30 @@ class JobView(generic.ListView):
         first_day_of_month = date(year, month, 1)
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
+        jobs = Job.objects.filter(
+            created_at__year=year, created_at__month=month
+        )
+        interviews = Interview.objects.filter(
+            scheduled_time__year=year, scheduled_time__month=month
+        )
+        jobs_by_day = {}
+        for job in jobs:
+            d = job.created_at.day
+            jobs_by_day.setdefault(d, []).append(job)
+
+        interviews_by_day = {}
+        for interview in interviews:
+            d = interview.scheduled_time.day
+            interviews_by_day.setdefault(d, []).append(interview)
 
         cal = JobCalendar(year, month)
-        html_cal = cal.formatmonth(year, month, withyear=True)
+        html_cal = cal.formatmonth(
+            year,
+            month,
+            withyear=True,
+            jobs=jobs_by_day,
+            interviews=interviews_by_day,
+        )
         context["calendar"] = mark_safe(html_cal)
         context["prev_year"] = prev_month_date.year
         context["prev_month"] = prev_month_date.month
