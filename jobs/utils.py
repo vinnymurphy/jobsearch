@@ -97,7 +97,7 @@ class JobCalendar(calendar.HTMLCalendar):
     def __init__(self, year=None, month=None):
         self.year = year
         self.month = month
-        super().__init__()
+        super().__init__(firstweekday=calendar.SUNDAY)
 
     # formats a day as a td
     # filter events by day
