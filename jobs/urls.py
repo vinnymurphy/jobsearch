@@ -7,6 +7,7 @@ from .views import (
     JobDetailView,
     JobView,
     dashboard_view,
+    UnemploymentView,
     export_calendar_pdf,
 )
 
@@ -30,5 +31,10 @@ urlpatterns = [
         "export/pdf/<int:year>/<int:month>/",
         export_calendar_pdf,
         name="export_pdf",
+    ),
+    path(
+        "unemployment-report/",
+        UnemploymentView.as_view(),
+        name="unemployment_report",
     ),
 ]
