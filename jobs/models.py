@@ -118,7 +118,7 @@ class Job(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
     posted_by = models.CharField(max_length=255, blank=True)
-    application_link = models.URLField(blank=True)
+    application_link = models.URLField(blank=True, max_length=1000)
 
     slug = models.SlugField(unique=True, blank=True)
 

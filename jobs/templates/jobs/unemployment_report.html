@@ -21,7 +21,18 @@
                         <small class="fw-bold">{{ job.created_at|date:"Y/m/d" }}</small>
                     </div>
                     <p class="mb-1">Position: {{ job.title }}</p>
-                    <small>Method: Online/Website</small>
+                    {% if job.application_link %}
+                    <div class="btn-group">
+                      <a href="{{ job.application_link }}" target="_blank" class="btn btn-sm btn-outline-info" title="Open Link">
+                        <i class="bi bi-link-45deg"></i> View Post
+                      </a>
+                      <button class="btn btn-sm btn-outline-secondary"
+                              onclick="navigator.clipboard.writeText('{{ job.application_link }}')"
+                              title="Copy to Clipboard">
+                        Copy Link
+                      </button>
+                    </div>
+                    {% endif %}
                 </div>
                 {% empty %}
                 <p class="text-muted">No applications found for this period.</p>
