@@ -8,6 +8,9 @@ venv/
 ENV/
 env/
 
+# backup directory
+backups/
+
 # Django-specific
 db.sqlite3
 db.sqlite3-journal
