@@ -27,7 +27,10 @@
             <a class="nav-link" href="{% url 'job_calendar' %}">Calendar</a>
             <a class="nav-link" href="{% url 'interview_calendar' %}">Interviews</a>
             <a class="nav-link" href="{% url 'job_create' %}">Add Job</a>
-
+            <a class="nav-link {% if request.resolver_match.url_name == 'unemployment_report' %}active{% endif %}"
+               href="{% url 'unemployment_report' %}">
+              <i class="bi bi-journal-check"></i> Job Log
+            </a>
         </div>
     </div>
 </nav>
