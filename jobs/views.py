@@ -142,11 +142,13 @@ class JobView(generic.ListView):
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
         jobs = Job.objects.filter(
-            created_at__year=year, created_at__month=month
-        )
+            created_at__year=year,
+            created_at__month=month
+        ).select_related('company')
         interviews = Interview.objects.filter(
-            scheduled_time__year=year, scheduled_time__month=month
-        )
+            scheduled_time__year=year,
+            scheduled_time__month=month
+        ).select_related('job__company')
         jobs_by_day = {}
         for job in jobs:
             d = job.created_at.day
@@ -198,7 +200,7 @@ class JobDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["interviews"] = self.object.interviews.order_by(
+        context["interviews"] = self.object.interviews.select_related('interviewer').order_by(
             "-scheduled_time"
         )
         context["form"] = InterviewForm()
@@ -252,10 +254,10 @@ class UnemploymentView(generic.ListView):
         seven_days_ago = today - timedelta(days=days_back)
         context["recent_jobs"] = Job.objects.filter(
             created_at__gte=seven_days_ago
-        ).order_by("-created_at")
+        ).select_related('company').order_by("-created_at")
         context["recent_interviews"] = Interview.objects.filter(
             scheduled_time__gte=seven_days_ago
-        ).order_by("-scheduled_time")
+        ).select_related('job__company').order_by("-scheduled_time")
         context["report_start_date"] = seven_days_ago
         context["report_end_date"] = today
         return context
