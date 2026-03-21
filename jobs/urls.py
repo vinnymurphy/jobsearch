@@ -1,15 +1,15 @@
-from django.urls import path
-
 from .views import (
     InterviewDetailView,
     InterviewView,
     JobCreateView,
     JobDetailView,
     JobView,
-    dashboard_view,
     UnemploymentView,
+    dashboard_view,
     export_calendar_pdf,
 )
+
+from django.urls import path
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),

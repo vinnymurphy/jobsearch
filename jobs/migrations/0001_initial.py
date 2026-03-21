@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []
@@ -76,10 +75,18 @@ class Migration(migrations.Migration):
                 ("location", models.CharField(max_length=150)),
                 (
                     "requirements",
-                    models.TextField(help_text="List skills or experience needed."),
+                    models.TextField(
+                        help_text="List skills or experience needed."
+                    ),
                 ),
-                ("salary_min", models.PositiveIntegerField(blank=True, null=True)),
-                ("salary_max", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "salary_min",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "salary_max",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
                 (
                     "job_type",
                     models.CharField(

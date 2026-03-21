@@ -1,7 +1,7 @@
-from django.contrib import admin
-
 from .forms import CompanyForm
 from .models import Company, Industry, Interview, Interviewer, Job
+
+from django.contrib import admin
 
 
 @admin.register(Interviewer)
@@ -65,7 +65,10 @@ class JobAdmin(admin.ModelAdmin):
             "Compensation",
             {
                 "fields": ("salary_min", "salary_max"),
-                "description": "Enter the salary range for this job. Both fields are optional.  ",
+                "description": (
+                    "Enter the salary range for this job. "
+                    "Both fields are optional.  "
+                ),
             },
         ),
         ("Status", {"fields": ("status",)}),

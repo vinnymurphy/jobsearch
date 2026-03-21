@@ -1,6 +1,6 @@
-from django import forms
-
 from .models import Company, Industry, Interview, Interviewer, Job
+
+from django import forms
 
 
 class InterviewerForm(forms.ModelForm):

@@ -1,7 +1,8 @@
-from .models import Job, Company
+from .models import Company, Job
+
 
 def database_stats(request):
     return {
-        'total_jobs': Job.objects.count(),
-        'total_companies': Company.objects.count(),
+        "total_jobs": Job.objects.count(),
+        "total_companies": Company.objects.count(),
     }

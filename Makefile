@@ -16,6 +16,9 @@ help:
 	@echo "  make shell    - Open the Django interactive shell"
 	@echo "  make backup   - Export database to timestamped JSON"
 	@echo "  make restore  - Load data from the most recent backup file"
+	@echo "  make format   - run ruff check --fix on the code base
+	@echo "  make lint     - run ruff check on the code base
+	@echo "  make check    - Safety Suite where we run format, test, backup
 	@echo "  make clean    - Remove __pycache__ and build artifacts"
 
 install:
@@ -54,3 +57,29 @@ restore:
 	@$(MANAGE) loaddata $(shell ls -t $(BACKUP_DIR)/*.json | head -1)
 	@echo "RESULT: Database synchronized with $(shell ls -t $(BACKUP_DIR)/*.json | head -1)"
 	@echo "----------------------------------------------------------------"
+
+.PHONY: help install migrate run test shell clean backup restore format lint
+
+# ... (keep existing targets) ...
+
+format:
+	@echo "----------------------------------------------------------------"
+	@echo "BUILD STATUS: Formatting with Ruff..."
+	@ruff format .
+	@ruff check --fix .
+	@echo "RESULT: Codebase formatted and auto-fixed."
+	@echo "----------------------------------------------------------------"
+
+lint:
+	@echo "----------------------------------------------------------------"
+	@echo "BUILD STATUS: Linting with Ruff..."
+	@ruff check .
+	@echo "RESULT: Linting complete."
+	@echo "----------------------------------------------------------------"
+
+# The "Safety Suite" - Run everything in one go
+check: format test backup
+	@echo "----------------------------------------------------------------"
+	@echo "PIPELINE STATUS: ALL CHECKS PASSED"
+	@echo "----------------------------------------------------------------"
+

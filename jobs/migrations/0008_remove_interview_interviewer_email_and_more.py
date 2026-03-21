@@ -4,9 +4,11 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("jobs", "0007_rename_interview_phone_interview_interviewer_phone_and_more"),
+        (
+            "jobs",
+            "0007_rename_interview_phone_interview_interviewer_phone_and_more",
+        ),
     ]
 
     operations = [

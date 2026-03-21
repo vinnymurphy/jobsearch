@@ -1,9 +1,9 @@
+from .models import Interview
+
 import calendar
 from datetime import date, datetime, timedelta
 
 from django.urls import reverse
-
-from .models import Interview
 
 
 def get_date(req_day):
@@ -59,11 +59,13 @@ class InterviewCalendar(calendar.HTMLCalendar):
             title = event.title
 
             # 2. Inject the color_class into the <li>
-            d += f"<li class='calendar-event {color_class}'><a href='{url}'>{company_name}</a>{title}</li>"
+            d += f"<li class='calendar-event {color_class}'>"
+            d += f"<a href='{url}'>{company_name}</a>{title}</li>"
         if day != 0:
             return (
                 "<td>"
-                f"<a href='{url}' class='date-link' title='Add job for this day'>{day}</a>"
+                f"<a href='{url}' class='date-link' "
+                f"title='Add job for this day'>{day}</a>"
                 f"<ul> {d} </ul>"
                 "</td>"
             )
@@ -83,9 +85,14 @@ class InterviewCalendar(calendar.HTMLCalendar):
         events = Interview.objects.filter(
             scheduled_time__year=self.year, scheduled_time__month=self.month
         )
-
-        cal = '<table border="0" cellpadding="0" cellspacing="0" class="calendar">\n'
-        cal += f"{self.formatmonthname(self.year, self.month, withyear=withyear)}\n"
+        the_month = self.formatmonthname(
+            self.year, self.month, withyear=withyear
+        )
+        cal = (
+            '<table border="0" cellpadding="0" '
+            'cellspacing="0" class="calendar">\n'
+        )
+        cal += f"{the_month}\n"
         cal += f"{self.formatweekheader()}\n"
         for week in self.monthdays2calendar(self.year, self.month):
             cal += f"{self.formatweek(week, events)}\n"
@@ -114,13 +121,18 @@ class JobCalendar(calendar.HTMLCalendar):
             )
             title = job.title
             # Add a link to the interview or just show the company name
-            d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a>{title}</li>"
-
+            d += (
+                f"<li class='calendar-event'><a href='{url}'"
+                f" target='_blank'>{company_name}</a>{title}</li>"
+            )
         interview_days = interviews.get(day, [])
         for interview in interview_days:
             url = reverse("interview_detail", args=[interview.id])
             title = interview.job.title if interview.job else "Unknown"
-            d += f"<li class='calendar-event bg-interview'><a href='{url}'>{interview}</a> ({title})</li>"
+            d += (
+                "<li class='calendar-event bg-interview'>"
+                f"<a href='{url}'>{interview}</a> ({title})</li>"
+            )
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"
         return "<td></td>"
