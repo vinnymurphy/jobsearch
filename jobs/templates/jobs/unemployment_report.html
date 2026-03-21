@@ -20,7 +20,7 @@
                         <h5 class="mb-1">{{ job.company.name }}</h5>
                         <small class="fw-bold">{{ job.created_at|date:"Y/m/d" }}</small>
                     </div>
-                    <p class="mb-1">Position: {{ job.title }}</p>
+                    <p class="mb-1">{{ job.title }}</p>
                     {% if job.application_link %}
                     <div class="btn-group">
                       <a href="{{ job.application_link }}" target="_blank" class="btn btn-sm btn-outline-info" title="Open Link">
