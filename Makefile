@@ -19,6 +19,7 @@ help:
 	@echo "  make clean    - Remove __pycache__ and build artifacts"
 
 install:
+	pip install --upgrade pip
 	pip install -r requirements.txt
 
 migrate:
