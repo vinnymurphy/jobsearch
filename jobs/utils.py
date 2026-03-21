@@ -59,7 +59,7 @@ class InterviewCalendar(calendar.HTMLCalendar):
             title = event.title
 
             # 2. Inject the color_class into the <li>
-            d += f"<li class='calendar-event {color_class}'><a href='{url}'>{company_name}</a> ({title})</li>"
+            d += f"<li class='calendar-event {color_class}'><a href='{url}'>{company_name}</a>{title}</li>"
         if day != 0:
             return (
                 "<td>"
@@ -114,7 +114,7 @@ class JobCalendar(calendar.HTMLCalendar):
             )
             title = job.title
             # Add a link to the interview or just show the company name
-            d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a> ({title})</li>"
+            d += f"<li class='calendar-event'><a href='{url}' target='_blank'>{company_name}</a>{title}</li>"
 
         interview_days = interviews.get(day, [])
         for interview in interview_days:
