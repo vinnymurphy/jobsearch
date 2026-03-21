@@ -1,18 +1,19 @@
 import csv
 import os
-import django
 from datetime import datetime
+
+import django
 
 # Setup Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
-from django.utils.timezone import make_aware
+from jobs.models import Company, Interview, Job  # noqa: E402
 
-from jobs.models import Job, Company, Interview, Industry
+from django.utils.timezone import make_aware  # noqa: E402
 
 
 def run_import():
-    with open("interview.csv", "r") as f:
+    with open("interview.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
             co_name = row["Company"].strip()
@@ -22,8 +23,8 @@ def run_import():
             naive_dt = datetime.strptime(row["Date"], "%Y-%m-%d")
             aware_dt = make_aware(naive_dt)
 
-            # 2. Robust Job Lookup
-            # We look for a job at that company where the title matches the role
+            # 2. Robust Job Lookup We look for a job at that company
+            # where the title matches the role
             job_obj = Job.objects.filter(
                 company__name__iexact=co_name, title__icontains=role_name
             ).first()
@@ -36,9 +37,11 @@ def run_import():
                     feedback=f"Initial contact for {role_name}",
                 )
             else:
-                # If no job exists yet, create a "Placeholder" Job so the Interview can save
+                # If no job exists yet, create a "Placeholder" Job so
+                # the Interview can save
                 print(
-                    f"No job found for {role_name} at {co_name}. Creating placeholder."
+                    f"No job found for {role_name} at {co_name}. "
+                    "Creating placeholder."
                 )
                 company_obj, _ = Company.objects.get_or_create(name=co_name)
                 new_job = Job.objects.create(

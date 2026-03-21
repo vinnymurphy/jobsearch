@@ -65,7 +65,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                'jobs.context_processors.database_stats',
+                "jobs.context_processors.database_stats",
             ],
         },
     },
@@ -90,19 +90,19 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
+AUTH_VAL_PATH = "django.contrib.auth.password_validation"
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": f"{AUTH_VAL_PATH}.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": f"{AUTH_VAL_PATH}.MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": f"{AUTH_VAL_PATH}.CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": f"{AUTH_VAL_PATH}.NumericPasswordValidator",
     },
 ]
 

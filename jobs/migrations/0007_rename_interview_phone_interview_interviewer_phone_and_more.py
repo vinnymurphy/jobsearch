@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("jobs", "0006_interview_interview_phone_and_more"),
     ]

@@ -1,6 +1,15 @@
+from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
+from .models import Interview, Job
+from .utils import (
+    InterviewCalendar,
+    JobCalendar,
+    get_date,
+    next_month,
+    prev_month,
+)
+
 from datetime import date, timedelta
 from typing import Any
-from django.utils import timezone
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
@@ -12,16 +21,6 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 from weasyprint import HTML
-
-from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
-from .models import Interview, Job
-from .utils import (
-    InterviewCalendar,
-    JobCalendar,
-    get_date,
-    next_month,
-    prev_month,
-)
 
 
 def dashboard_view(request):
@@ -142,13 +141,11 @@ class JobView(generic.ListView):
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
         jobs = Job.objects.filter(
-            created_at__year=year,
-            created_at__month=month
-        ).select_related('company')
+            created_at__year=year, created_at__month=month
+        ).select_related("company")
         interviews = Interview.objects.filter(
-            scheduled_time__year=year,
-            scheduled_time__month=month
-        ).select_related('job__company')
+            scheduled_time__year=year, scheduled_time__month=month
+        ).select_related("job__company")
         jobs_by_day = {}
         for job in jobs:
             d = job.created_at.day
@@ -200,9 +197,9 @@ class JobDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["interviews"] = self.object.interviews.select_related('interviewer').order_by(
-            "-scheduled_time"
-        )
+        context["interviews"] = self.object.interviews.select_related(
+            "interviewer"
+        ).order_by("-scheduled_time")
         context["form"] = InterviewForm()
         return context
 
@@ -233,7 +230,8 @@ class JobDetailView(generic.DetailView):
                 self.get_context_data(interviewer_form=form)
             )
 
-        # Fallback: If somehow the POST reached here without a valid button name
+        # Fallback: If somehow the POST reached here without a valid
+        # button name
         return self.render_to_response(self.get_context_data())
 
 
@@ -243,7 +241,7 @@ class UnemploymentView(generic.ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        days_back = self.request.GET.get('days', 7)
+        days_back = self.request.GET.get("days", 7)
         try:
             days_back = int(days_back)
             if days_back < 1:
@@ -252,12 +250,16 @@ class UnemploymentView(generic.ListView):
             days_back = 7  # Default to 7 days if invalid input
         today = timezone.now()
         seven_days_ago = today - timedelta(days=days_back)
-        context["recent_jobs"] = Job.objects.filter(
-            created_at__gte=seven_days_ago
-        ).select_related('company').order_by("-created_at")
-        context["recent_interviews"] = Interview.objects.filter(
-            scheduled_time__gte=seven_days_ago
-        ).select_related('job__company').order_by("-scheduled_time")
+        context["recent_jobs"] = (
+            Job.objects.filter(created_at__gte=seven_days_ago)
+            .select_related("company")
+            .order_by("-created_at")
+        )
+        context["recent_interviews"] = (
+            Interview.objects.filter(scheduled_time__gte=seven_days_ago)
+            .select_related("job__company")
+            .order_by("-scheduled_time")
+        )
         context["report_start_date"] = seven_days_ago
         context["report_end_date"] = today
         return context
