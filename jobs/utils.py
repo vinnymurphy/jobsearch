@@ -76,3 +76,9 @@ class MasterCalendar(calendar.HTMLCalendar):
             cal += f"{self.formatweek(week, jobs, interviews)}\n"
         cal += "</tbody></table>"
         return cal
+
+def get_unemployment_week(d):
+    # Adjust to the previous Sunday
+    start = d - timedelta(days=(d.weekday() + 1) % 7)
+    end = start + timedelta(days=6)
+    return start, end
