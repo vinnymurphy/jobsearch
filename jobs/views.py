@@ -3,8 +3,6 @@ from .models import Interview, Job
 from .utils import (
     MasterCalendar,
     get_date,
-    next_month,
-    prev_month,
 )
 
 from datetime import date, timedelta
@@ -43,7 +41,7 @@ def dashboard_view(request):
 
 
 def export_calendar_pdf(request, year, month):
-    cal = JobCalendar(year, month)
+    cal = MasterCalendar(year, month)
     html_string = render_to_string(
         "jobs/calendar_pdf.html",
         {"calendar": cal, "year": year, "month": month},
@@ -57,22 +55,6 @@ def export_calendar_pdf(request, year, month):
     )
     response.write(result)
     return response
-
-class InterviewView(generic.ListView):
-    model = Interview
-    template_name = "jobs/interview_calendar.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        d = get_date(self.request.GET.get("month", None))
-        cal = InterviewCalendar(d.year, d.month)
-        html_cal = cal.formatmonth(withyear=True)
-        context["calendar"] = mark_safe(html_cal)
-        context["prev_month"] = prev_month(d)
-        context["next_month"] = next_month(d)
-        return context
-
 
 
 def create_job(request):
@@ -139,7 +121,8 @@ class JobView(generic.ListView):
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
         jobs = Job.objects.filter(
-            created_at__year=year, created_at__month=month
+            applied_date__year=year,
+            applied_date__month=month,
         ).select_related("company")
         interviews = Interview.objects.filter(
             scheduled_time__year=year, scheduled_time__month=month
@@ -148,15 +131,14 @@ class JobView(generic.ListView):
         for job in jobs:
             d = job.created_at.day
             jobs_by_day.setdefault(d, []).append(job)
-        print(f"DEBUBG: Jobs by day: {jobs_by_day}")
         interviews_by_day = {}
         for interview in interviews:
             d = interview.scheduled_time.day
             interviews_by_day.setdefault(d, []).append(interview)
 
         cal = MasterCalendar(
-            year, 
-            month, 
+            year,
+            month,
         )
         html_cal = cal.formatmonth(
             withyear=True,
@@ -262,29 +244,3 @@ class UnemploymentView(generic.ListView):
         context["report_start_date"] = seven_days_ago
         context["report_end_date"] = today
         return context
-
-# jobs/views.py
-from django.utils import timezone
-from .utils import MasterCalendar
-
-def calendar_view(request):
-    # Efficiently gather data for the month
-    jobs = Job.objects.filter(applied_date__year=year, applied_date__month=month)
-    interviews = Interview.objects.filter(scheduled_time__year=year, scheduled_time__month=month)
-
-    # Convert querysets to dictionaries grouped by day
-    # This keeps the calendar rendering fast (O(1) lookup per day)
-    jobs_dict = {}
-    for j in jobs:
-        day = j.applied_date.day
-        jobs_dict.setdefault(day, []).append(j)
-
-    int_dict = {}
-    for i in interviews:
-        day = i.scheduled_time.day
-        int_dict.setdefault(day, []).append(i)
-
-    cal = MasterCalendar(year, month)
-    html_cal = cal.formatmonth(withyear=True, jobs=jobs_dict, interviews=int_dict)
-
-    return render(request, 'jobs/calendar.html', {'calendar': html_cal})

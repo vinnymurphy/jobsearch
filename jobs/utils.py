@@ -1,5 +1,3 @@
-from .models import Interview
-
 import calendar
 from datetime import date, datetime, timedelta
 
@@ -10,7 +8,7 @@ def get_date(req_day):
     if req_day:
         year, month = map(int, req_day.split("-"))
         return date(year, month, day=1)
-    return datetime.today()
+    return datetime.now()
 
 
 def prev_month(d):
@@ -51,21 +49,30 @@ class MasterCalendar(calendar.HTMLCalendar):
             title = interview.job.title if interview.job else "Unknown"
             d += f"<li class='calendar-event bg-interview'><a href='{url}'>"
             d += f"{interview}</a> ({title})</li>"
-        return f'<td><span class="date">{day}</span><ul class="list-unstyled">{d}</ul></td>'
+        return (
+            f'<td><span class="date">{day}</span>'
+            f'<ul class="list-unstyled">{d}</ul></td>'
+        )
 
     def formatweek(self, theweek, jobs, interviews):
-        s = ''.join(self.formatday(d, wd, jobs, interviews) for (d, wd) in theweek)
-        return f'<tr>{s}</tr>'
+        s = "".join(
+            self.formatday(d, wd, jobs, interviews) for (d, wd) in theweek
+        )
+        return f"<tr>{s}</tr>"
 
-    def formatmonth(self, withyear=True, jobs=None, interviews=None, **kwargs):
+    def formatmonth(
+        self, withyear=True, jobs=None, interviews=None, **kwargs
+    ):
         jobs = jobs or {}
         interviews = interviews or {}
-
+        month_name = self.formatmonthname(
+            self.year, self.month, withyear=withyear
+        )
         cal = '<table class="table table-bordered calendar">\n'
-        cal += f'<thead>{self.formatmonthname(self.year, self.month, withyear=withyear)}</thead>\n'
-        cal += f'{self.formatweekheader()}\n'
-        cal += '<tbody>'
+        cal += f"{month_name}\n"
+        cal += f"{self.formatweekheader()}\n"
+        cal += "<tbody>"
         for week in self.monthdays2calendar(self.year, self.month):
-            cal += f'{self.formatweek(week, jobs, interviews)}\n'
-        cal += '</tbody></table>'
+            cal += f"{self.formatweek(week, jobs, interviews)}\n"
+        cal += "</tbody></table>"
         return cal

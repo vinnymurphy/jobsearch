@@ -1,6 +1,5 @@
 from .views import (
     InterviewDetailView,
-    InterviewView,
     JobCreateView,
     JobDetailView,
     JobView,
