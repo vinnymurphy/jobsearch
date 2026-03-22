@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -112,7 +113,7 @@ class Job(models.Model):
     work_mode = models.CharField(
         max_length=10, choices=WORK_MODE_CHOICES, default="onsite"
     )
-
+    applied_date = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)

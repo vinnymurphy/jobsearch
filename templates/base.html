@@ -24,8 +24,7 @@
         <a class="navbar-brand" href="{% url 'dashboard' %}">🎯 JobSearch</a>
         <div class="navbar-nav">
             <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-            <a class="nav-link" href="{% url 'job_calendar' %}">Calendar</a>
-            <a class="nav-link" href="{% url 'interview_calendar' %}">Interviews</a>
+            <a class="nav-link" href="{% url 'calendar' %}">Calendar</a>
             <a class="nav-link" href="{% url 'job_create' %}">Add Job</a>
             <a class="nav-link {% if request.resolver_match.url_name == 'unemployment_report' %}active{% endif %}"
                href="{% url 'unemployment_report' %}">
