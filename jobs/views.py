@@ -120,9 +120,11 @@ class JobView(generic.ListView):
         first_day_of_month = date(year, month, 1)
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
+        today = timezone.now().date()
         jobs = Job.objects.filter(
             applied_date__year=year,
             applied_date__month=month,
+            applied_date__lte=today,
         ).select_related("company")
         interviews = Interview.objects.filter(
             scheduled_time__year=year, scheduled_time__month=month
