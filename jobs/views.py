@@ -1,8 +1,7 @@
 from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
 from .models import Interview, Job
 from .utils import (
-    InterviewCalendar,
-    JobCalendar,
+    MasterCalendar,
     get_date,
     next_month,
     prev_month,
@@ -59,6 +58,22 @@ def export_calendar_pdf(request, year, month):
     response.write(result)
     return response
 
+class InterviewView(generic.ListView):
+    model = Interview
+    template_name = "jobs/interview_calendar.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        d = get_date(self.request.GET.get("month", None))
+        cal = InterviewCalendar(d.year, d.month)
+        html_cal = cal.formatmonth(withyear=True)
+        context["calendar"] = mark_safe(html_cal)
+        context["prev_month"] = prev_month(d)
+        context["next_month"] = next_month(d)
+        return context
+
+
 
 def create_job(request):
     if request.method == "POST":
@@ -75,7 +90,7 @@ class JobCreateView(SuccessMessageMixin, generic.CreateView):
     model = Job
     form_class = JobForm
     template_name = "jobs/job_form.html"
-    success_url = reverse_lazy("job_calendar")
+    success_url = reverse_lazy("calendar")
 
     success_message = "Job for %(title)s at %(company)s created successfully!"
 
@@ -105,29 +120,12 @@ def create_industry(request):
     return render(request, "jobs/create_industry.html", {"form": form})
 
 
-class InterviewView(generic.ListView):
-    model = Interview
-    template_name = "jobs/interview_calendar.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        d = get_date(self.request.GET.get("month", None))
-        cal = InterviewCalendar(d.year, d.month)
-        html_cal = cal.formatmonth(withyear=True)
-        context["calendar"] = mark_safe(html_cal)
-        context["prev_month"] = prev_month(d)
-        context["next_month"] = next_month(d)
-        return context
-
-
 class JobView(generic.ListView):
     model = Job
-    template_name = "jobs/job_calendar.html"
+    template_name = "jobs/calendar.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         today = date.today()
         try:
             year = int(self.request.GET.get("year", today.year))
@@ -150,16 +148,17 @@ class JobView(generic.ListView):
         for job in jobs:
             d = job.created_at.day
             jobs_by_day.setdefault(d, []).append(job)
-
+        print(f"DEBUBG: Jobs by day: {jobs_by_day}")
         interviews_by_day = {}
         for interview in interviews:
             d = interview.scheduled_time.day
             interviews_by_day.setdefault(d, []).append(interview)
 
-        cal = JobCalendar(year, month)
+        cal = MasterCalendar(
+            year, 
+            month, 
+        )
         html_cal = cal.formatmonth(
-            year,
-            month,
             withyear=True,
             jobs=jobs_by_day,
             interviews=interviews_by_day,
@@ -263,3 +262,29 @@ class UnemploymentView(generic.ListView):
         context["report_start_date"] = seven_days_ago
         context["report_end_date"] = today
         return context
+
+# jobs/views.py
+from django.utils import timezone
+from .utils import MasterCalendar
+
+def calendar_view(request):
+    # Efficiently gather data for the month
+    jobs = Job.objects.filter(applied_date__year=year, applied_date__month=month)
+    interviews = Interview.objects.filter(scheduled_time__year=year, scheduled_time__month=month)
+
+    # Convert querysets to dictionaries grouped by day
+    # This keeps the calendar rendering fast (O(1) lookup per day)
+    jobs_dict = {}
+    for j in jobs:
+        day = j.applied_date.day
+        jobs_dict.setdefault(day, []).append(j)
+
+    int_dict = {}
+    for i in interviews:
+        day = i.scheduled_time.day
+        int_dict.setdefault(day, []).append(i)
+
+    cal = MasterCalendar(year, month)
+    html_cal = cal.formatmonth(withyear=True, jobs=jobs_dict, interviews=int_dict)
+
+    return render(request, 'jobs/calendar.html', {'calendar': html_cal})

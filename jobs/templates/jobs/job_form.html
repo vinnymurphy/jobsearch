@@ -1,7 +1,7 @@
 
 {% extends "base.html" %}
 {% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="{% url 'job_calendar' %}">Calendar</a></li>
+<li class="breadcrumb-item"><a href="{% url 'calendar' %}">Calendar</a></li>
 <li class="breadcrumb-item active" aria-current="page">
     {% if object %}Edit Job{% else %}Add Application{% endif %}
 </li>
@@ -16,7 +16,7 @@
     <button type="submit">Save Job</button>
 </form>
 
-<a href="{% url 'job_calendar' %}">Cancel and Return to Calendar</a>
+<a href="{% url 'calendar' %}">Cancel and Return to Calendar</a>
 {% endblock %}
 {% block extra_js %}
 <script>
