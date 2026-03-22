@@ -58,7 +58,7 @@ class JobPerformanceTest(TestCase):
         Verify that 20 jobs don't cause 20+ queries.
         With select_related, it should be a constant low number.
         """
-        url = reverse("job_calendar") + "?year=2026&month=3"
+        url = reverse("calendar") + "?year=2026&month=3"
 
         # We expect ~5-7 queries: Session, User, Jobs (1 JOIN),
         # Interviews, etc.  Without select_related, this would be 25+.
