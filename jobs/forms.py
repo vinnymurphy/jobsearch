@@ -1,6 +1,8 @@
-from .models import Company, Industry, Interview, Interviewer, Job
+from datetime import date
 
 from django import forms
+
+from .models import Company, Industry, Interview, Interviewer, Job
 
 
 class InterviewerForm(forms.ModelForm):
@@ -28,25 +30,24 @@ class CompanyForm(forms.ModelForm):
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = [
-            "title",
-            "slug",
-            "company",
-            "description",
-            "location",
-            "salary_min",
-            "salary_max",
-            "job_type",
-            "level",
-            "status",
-            "work_mode",
-            "expiry_date",
-            "application_link",
-        ]
+        fields = "__all__"
         widgets = {
+            "applied_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "company": forms.Select(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"rows": 4}),
         }
         fields = "__all__"
+
+        def clean_applied_date(self):
+            applied_date = self.cleaned_data.get("applied_date")
+            if applied_date and applied_date > date.today():
+                raise forms.ValidationError(
+                    "Applied date cannot be in the future."
+                )
+            return applied_date
 
 
 class IndustryForm(forms.ModelForm):

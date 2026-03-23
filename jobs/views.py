@@ -1,15 +1,10 @@
-from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
-from .models import Interview, Job
-from .utils import (
-    MasterCalendar,
-    get_date,
-)
-
+from collections import OrderedDict
 from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -18,6 +13,10 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 from weasyprint import HTML
+
+from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
+from .models import Interview, Job
+from .utils import MasterCalendar, get_date
 
 
 def dashboard_view(request):
@@ -120,9 +119,11 @@ class JobView(generic.ListView):
         first_day_of_month = date(year, month, 1)
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
+        today = timezone.now().date()
         jobs = Job.objects.filter(
             applied_date__year=year,
             applied_date__month=month,
+            applied_date__lte=today,
         ).select_related("company")
         interviews = Interview.objects.filter(
             scheduled_time__year=year, scheduled_time__month=month
@@ -243,4 +244,27 @@ class UnemploymentView(generic.ListView):
         )
         context["report_start_date"] = seven_days_ago
         context["report_end_date"] = today
+        return context
+
+class UnemploymentReportView(generic.ListView):
+    model = Job
+    template_name = "jobs/unemployment_report.html"
+    context_object_name = "jobs"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Fetch all jobs, ordered by date
+        all_jobs = Job.objects.all().order_by('-applied_date').select_related('company')
+        
+        weeks = OrderedDict()
+        
+        for job in all_jobs:
+            start, end = get_unemployment_week(job.applied_date)
+            week_label = f"{start.strftime('%b %d')} — {end.strftime('%b %d, %Y')}"
+            
+            if week_label not in weeks:
+                weeks[week_label] = []
+            weeks[week_label].append(job)
+            
+        context['weekly_log'] = weeks
         return context
