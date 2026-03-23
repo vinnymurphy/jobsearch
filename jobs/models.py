@@ -76,6 +76,9 @@ class Job(models.Model):
     STATUS_CHOICES = [
         ("draft", "Draft"),
         ("open", "Open"),
+        ("applied", "Applied"),
+        ("interviewing", "Interviewing"),
+        ("rejected", "Rejected"),
         ("closed", "Closed"),
     ]
     LEVEL_CHOICES = [
@@ -108,7 +111,7 @@ class Job(models.Model):
         max_length=2, choices=JOB_TYPE_CHOICES, default="FT"
     )
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default="draft"
+        max_length=12, choices=STATUS_CHOICES, default="open"
     )
     work_mode = models.CharField(
         max_length=10, choices=WORK_MODE_CHOICES, default="onsite"
