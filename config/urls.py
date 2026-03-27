@@ -18,8 +18,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+
+# A quick dummy view to return an empty JSON object
+def empty_json_view(request):
+    return HttpResponse("{}", content_type="application/json")
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("jobs.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
+    path(".well-known/appspecific/com.chrome.devtools.json", empty_json_view),
 ]
