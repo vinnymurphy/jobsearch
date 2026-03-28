@@ -19,17 +19,33 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="{% url 'dashboard' %}">🎯 JobSearch</a>
-        <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-            <a class="nav-link" href="{% url 'calendar' %}">Calendar</a>
-            <a class="nav-link" href="{% url 'job_create' %}">Add Job</a>
-            <a class="nav-link {% if request.resolver_match.url_name == 'unemployment_report' %}active{% endif %}"
-               href="{% url 'unemployment_report' %}">
-              <i class="bi bi-journal-check"></i> Job Log
-            </a>
+        <a class="navbar-brand fw-bold" href="https://github.com/vinnymurphy/jobsearch" target="_blank">
+            <i class="bi bi-github me-2"></i> JobSearch Management System
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'calendar' %}">Calendar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'unemployment_report' %}">Weekly Log</a>
+                </li>
+                <li><a class="nav-link {% if request.resolver_match.url_name == 'unemployment_report' %}active{% endif %}"
+-               href="{% url 'unemployment_report' %}">
+-              <i class="bi bi-journal-check"></i> Job Log
+-                   </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
@@ -52,7 +68,12 @@
 <footer class="container-fluid text-center mt-5 border-top pt-4">
   <div class="row">
     <div class="col-sm-6 text-md-start text-muted">
-      <small>JobSearch Management System | Build v1.0.4</small>
+      <span class="text-muted small">
+            Built on Fedora 43 | Python 3.14 | 
+            <a href="https://github.com/vinnymurphy/jobsearch" class="text-decoration-none text-secondary">
+                <i class="bi bi-code-slash"></i> View Source on GitHub
+            </a>
+        </span>
     </div>
     <div class="col-sm-6 text-md-end text-muted">
       <small>
