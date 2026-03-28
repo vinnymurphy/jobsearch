@@ -1,7 +1,7 @@
 # JobSearch Project Automation
-VENV_DIR = venv
-BIN_DIR = $(VENV_DIR)/bin
-PYTHON = $(BI_DIR)/python3
+VENV = venv
+BIN = $(VENV)/bin
+PYTHON = $(BIN)/python3
 MANAGE = $(PYTHON) manage.py
 BACKUP_DIR = backups
 TIMESTAMP = $(shell date +%F_%H%M%S)
@@ -25,7 +25,7 @@ help:
 
 setup:
 	@echo "[INFO] Initializing Virtual Environment..."
-	$(PYTHON) -m venv $(VENV)
+	python3 -m venv $(VENV)
 	$(BIN)/pip install --upgrade pip
 	$(BIN)/pip install -r requirements.txt
 	@echo "[SUCCESS] Environment ready. Run 'make migrate' next."
@@ -87,4 +87,3 @@ check: format test backup
 	@echo "----------------------------------------------------------------"
 	@echo "PIPELINE STATUS: ALL CHECKS PASSED"
 	@echo "----------------------------------------------------------------"
-
