@@ -22,6 +22,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 Verified Compatibility: Python 3.12 & 3.14-dev on Fedora 43 (x86_64).
+```
 
 ## 🚀 Quick Start (Fedora)
 
