@@ -47,13 +47,29 @@ The relationship flow follows this logic:
 
 ```mermaid
 graph TD
-    A[Industry] --> B[Company]
-    B --> C[Job]
-    C --> D[Interview]
-    E[Interviewer] --> D
-    F[JobCalendar] --> G[PDF_Export]
-    G -.-> H[WeasyPrint]
+    subgraph Models
+        A[User] --> B[Job]
+        B --> C[Company]
+        B --> D[Interview]
+        E[Interviewer] --> D
+    end
+
+    subgraph Logic & Views
+        B -- "applied_date" --> F[MasterCalendar]
+        B -- "status: rejected/int" --> F
+        B -- "get_unemployment_week" --> G[UnemploymentReportView]
+    end
+
+    subgraph Outputs
+        F --> H[Dashboard UI]
+        G --> I[Weekly Filing Log]
+        H -.-> J[WeasyPrint PDF]
+    end
+
+    style G fill:#d4edda,stroke:#28a745
+    style I fill:#d4edda,stroke:#28a745
 ```
+
 
 ## 🛠 Engineering Stack
 - **OS:** Fedora 43 (Workstation Edition)
@@ -66,3 +82,4 @@ graph TD
 - **Local-First / Privacy-Centric:** Designed to run on a local Fedora workstation to keep proprietary job search data and interview notes out of the public cloud.
 - **Observability:** Integrated with `django-debug-toolbar` for SQL query optimization and performance monitoring.
 - **RelOps Automation:** Uses a Sunday-to-Saturday logical windowing system to automate government-mandated unemployment reporting, reducing administrative overhead from hours to seconds.
+
