@@ -1,10 +1,13 @@
+from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
+from .models import Interview, Job
+from .utils import MasterCalendar, get_date
+
 from collections import OrderedDict
 from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
-from django.db.models.functions import TruncDate
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -13,10 +16,6 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 from weasyprint import HTML
-
-from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
-from .models import Interview, Job
-from .utils import MasterCalendar, get_date
 
 
 def dashboard_view(request):
@@ -246,6 +245,14 @@ class UnemploymentView(generic.ListView):
         context["report_end_date"] = today
         return context
 
+
+def get_unemployment_week(d):
+    # Adjust to the previous Sunday
+    start = d - timedelta(days=(d.weekday() + 1) % 7)
+    end = start + timedelta(days=6)
+    return start, end
+
+
 class UnemploymentReportView(generic.ListView):
     model = Job
     template_name = "jobs/unemployment_report.html"
@@ -254,17 +261,23 @@ class UnemploymentReportView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Fetch all jobs, ordered by date
-        all_jobs = Job.objects.all().order_by('-applied_date').select_related('company')
-        
+        all_jobs = (
+            Job.objects.all()
+            .order_by("-applied_date")
+            .select_related("company")
+        )
+
         weeks = OrderedDict()
-        
+
         for job in all_jobs:
             start, end = get_unemployment_week(job.applied_date)
-            week_label = f"{start.strftime('%b %d')} — {end.strftime('%b %d, %Y')}"
-            
+            week_label = (
+                f"{start.strftime('%b %d')} — {end.strftime('%b %d, %Y')}"
+            )
+
             if week_label not in weeks:
                 weeks[week_label] = []
             weeks[week_label].append(job)
-            
-        context['weekly_log'] = weeks
+
+        context["weekly_log"] = weeks
         return context
