@@ -38,7 +38,7 @@ run:
 	$(MANAGE) runserver
 
 test:
-	$(MANAGE) test jobs
+	$(MANAGE) test -v 2 jobs
 
 shell:
 	$(MANAGE) shell
