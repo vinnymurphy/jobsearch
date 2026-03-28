@@ -42,14 +42,15 @@ class MasterCalendar(calendar.HTMLCalendar):
             status_class = "bg-secondary"
             if job.status == "rejected":
                 status_class = "bg-danger-subtle text-danger border-danger"
-            elif job.status == "interviewing": 
+            elif job.status == "interviewing":
                 status_class = "bg-success-subtle text-success border-success"
             elif job.status == "closed":
                 status_class = "bg-dark-subtle text-dark border-dark"
             name = job.company.name if job.company else "Unknown Company"
             url = reverse("job_detail", args=[job.id])
             title = job.title
-            d += f'<div class="job-entry {status_class} p-1 mb-1 small rounded">'
+            d += f'<div class="job-entry {status_class} '
+            d += 'p-1 mb-1 small rounded">'
             d += f"<li class='calendar-event'><a href='{url}' "
             d += f"target='_blank'>{name}</a>{title}</li>"
             d += "</div>"
@@ -86,6 +87,7 @@ class MasterCalendar(calendar.HTMLCalendar):
             cal += f"{self.formatweek(week, jobs, interviews)}\n"
         cal += "</tbody></table>"
         return cal
+
 
 def get_unemployment_week(d):
     # Adjust to the previous Sunday

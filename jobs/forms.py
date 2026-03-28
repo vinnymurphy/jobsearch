@@ -1,8 +1,8 @@
+from .models import Company, Industry, Interview, Interviewer, Job
+
 from datetime import date
 
 from django import forms
-
-from .models import Company, Industry, Interview, Interviewer, Job
 
 
 class InterviewerForm(forms.ModelForm):
