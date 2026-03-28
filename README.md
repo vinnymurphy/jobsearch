@@ -30,6 +30,7 @@ To initialize the environment and database:
 make setup
 make migrate
 make run
+```
 
 ## 📊 Data Model
 
