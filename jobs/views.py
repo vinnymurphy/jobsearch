@@ -247,8 +247,11 @@ class UnemploymentView(generic.ListView):
 
 
 def get_unemployment_week(d):
-    # Adjust to the previous Sunday
-    start = d - timedelta(days=(d.weekday() + 1) % 7)
+    # Adjust to the previous Sunday unless it's already Sunday
+    if d.weekday() == 6:  # Sunday
+        start = d
+    else:
+        start = d - timedelta(days=(d.weekday() + 1) % 7)
     end = start + timedelta(days=6)
     return start, end
 
