@@ -1,15 +1,17 @@
 # JobSearch Project Automation
-PYTHON = python3
+VENV_DIR = venv
+BIN_DIR = $(VENV_DIR)/bin
+PYTHON = $(BI_DIR)/python3
 MANAGE = $(PYTHON) manage.py
 BACKUP_DIR = backups
 TIMESTAMP = $(shell date +%F_%H%M%S)
 
 
-.PHONY: help install migrate run test shell clean
+.PHONY: help setup install migrate run test shell clean
 
 help:
 	@echo "Available commands:"
-	@echo "  make install  - Install dependencies from requirements.txt"
+	@echo "  make setup    - Create venv and install dependencies"
 	@echo "  make migrate  - Generate and apply database migrations"
 	@echo "  make run      - Start the Django development server"
 	@echo "  make test     - Run the test suite (Performance & Logic)"
@@ -21,9 +23,12 @@ help:
 	@echo "  make check    - Safety Suite where we run format, test, backup
 	@echo "  make clean    - Remove __pycache__ and build artifacts"
 
-install:
-	pip install --upgrade pip
-	pip install -r requirements.txt
+setup:
+	@echo "[INFO] Initializing Virtual Environment..."
+	$(PYTHON) -m venv $(VENV)
+	$(BIN)/pip install --upgrade pip
+	$(BIN)/pip install -r requirements.txt
+	@echo "[SUCCESS] Environment ready. Run 'make migrate' next."
 
 migrate:
 	$(MANAGE) makemigrations
