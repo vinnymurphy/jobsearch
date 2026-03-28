@@ -20,8 +20,16 @@ git clone git@github.com:vinnymurphy/jobsearch.git
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-pip install weasyprint  # actually this is in requirements.txt, but just to be safe I added it
 ```
+Verified Compatibility: Python 3.12 & 3.14-dev on Fedora 43 (x86_64).
+
+## 🚀 Quick Start (Fedora)
+
+To initialize the environment and database:
+```bash
+make setup
+make migrate
+make run
 
 ## 📊 Data Model
 
@@ -46,3 +54,15 @@ graph TD
     F[JobCalendar] --> G[PDF_Export]
     G -.-> H[WeasyPrint]
 ```
+
+## 🛠 Engineering Stack
+- **OS:** Fedora 43 (Workstation Edition)
+- **Language:** Python 3.12 / 3.14 (Tested for future-compatibility)
+- **Framework:** Django 5.x / 6.x
+- **Database:** SQLite (Local-first for privacy/speed)
+- **Tooling:** `django-extensions`, `weasyprint` (for PDF generation), `Select2`
+
+## 🏗 Design Philosophy
+- **Local-First / Privacy-Centric:** Designed to run on a local Fedora workstation to keep proprietary job search data and interview notes out of the public cloud.
+- **Observability:** Integrated with `django-debug-toolbar` for SQL query optimization and performance monitoring.
+- **RelOps Automation:** Uses a Sunday-to-Saturday logical windowing system to automate government-mandated unemployment reporting, reducing administrative overhead from hours to seconds.
