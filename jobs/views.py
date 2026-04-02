@@ -27,7 +27,7 @@ def dashboard_view(request):
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
     recent_velocity = Job.objects.filter(
-        created_at__gte=seven_days_ago
+        applied_date__gte=seven_days_ago
     ).count()
 
     context = {
@@ -129,7 +129,7 @@ class JobView(generic.ListView):
         ).select_related("job__company")
         jobs_by_day = {}
         for job in jobs:
-            d = job.created_at.day
+            d = job.applied_date.day
             jobs_by_day.setdefault(d, []).append(job)
         interviews_by_day = {}
         for interview in interviews:

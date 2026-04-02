@@ -23,9 +23,9 @@ class UnemploymentView(generic.ListView):
         today = timezone.now()
         seven_days_ago = today - timedelta(days=days_back)
         context["recent_jobs"] = (
-            Job.objects.filter(created_at__gte=seven_days_ago)
+            Job.objects.filter(applied_date__gte=seven_days_ago)
             .select_related("company")
-            .order_by("-created_at")
+            .order_by("-applied_date")
         )
         context["recent_interviews"] = (
             Interview.objects.filter(scheduled_time__gte=seven_days_ago)
