@@ -27,7 +27,7 @@ def dashboard_view(request):
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
     recent_velocity = Job.objects.filter(
-        created_at__gte=seven_days_ago
+        applied_date__gte=seven_days_ago
     ).count()
 
     context = {
@@ -129,7 +129,7 @@ class JobView(generic.ListView):
         ).select_related("job__company")
         jobs_by_day = {}
         for job in jobs:
-            d = job.created_at.day
+            d = job.applied_date.day
             jobs_by_day.setdefault(d, []).append(job)
         interviews_by_day = {}
         for interview in interviews:
@@ -216,42 +216,11 @@ class JobDetailView(generic.DetailView):
         return self.render_to_response(self.get_context_data())
 
 
-class UnemploymentView(generic.ListView):
-    model = Job
-    template_name = "jobs/unemployment_report.html"
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        days_back = self.request.GET.get("days", 7)
-        try:
-            days_back = int(days_back)
-            if days_back < 1:
-                raise ValueError
-        except (ValueError, TypeError):
-            days_back = 7  # Default to 7 days if invalid input
-        today = timezone.now()
-        seven_days_ago = today - timedelta(days=days_back)
-        context["recent_jobs"] = (
-            Job.objects.filter(created_at__gte=seven_days_ago)
-            .select_related("company")
-            .order_by("-created_at")
-        )
-        context["recent_interviews"] = (
-            Interview.objects.filter(scheduled_time__gte=seven_days_ago)
-            .select_related("job__company")
-            .order_by("-scheduled_time")
-        )
-        context["report_start_date"] = seven_days_ago
-        context["report_end_date"] = today
-        return context
-
-
 def get_unemployment_week(d):
     # Adjust to the previous Sunday unless it's already Sunday
-    if d.weekday() == 6:  # Sunday
-        start = d
-    else:
-        start = d - timedelta(days=(d.weekday() + 1) % 7)
+    start = (
+        d if d.weekday() == 6 else d - timedelta(days=(d.weekday() + 1) % 7)
+    )
     end = start + timedelta(days=6)
     return start, end
 

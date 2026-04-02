@@ -1,9 +1,9 @@
+from .unemployment import UnemploymentView
 from .views import (
     InterviewDetailView,
     JobCreateView,
     JobDetailView,
     JobView,
-    UnemploymentView,
     dashboard_view,
     export_calendar_pdf,
 )
