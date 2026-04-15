@@ -69,6 +69,7 @@ class JobPerformanceTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
 
+
 class UnemploymentReportingTests(TestCase):
     """Test suite for the Sunday-to-Saturday logical windowing system.
     Ensures compliance with state-mandated reporting periods.
