@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="kpi-container" style="display: flex; gap: 20px; margin-bottom: 20px;">
-    <div class="kpi-card" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #e7f3ff;">
-        <h3>Velocity</h3>
-        <p style="font-size: 2rem; font-weight: bold; margin: 0;">{{ recent_velocity }}</p>
-        <small>Apps sent in last 7 days</small>
+    <div class="kpi-container"
+         style="display: flex;
+                gap: 20px;
+                margin-bottom: 20px">
+        <div class="kpi-card"
+             style="padding: 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background: #e7f3ff">
+            <h3>Velocity</h3>
+            <p style="font-size: 2rem; font-weight: bold; margin: 0;">{{ recent_velocity }}</p>
+            <small>Apps sent in last 7 days</small>
+        </div>
     </div>
-</div>
-<canvas id="jobChart" width="400" height="200"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+    <canvas id="jobChart" width="400" height="200"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
     const ctx = document.getElementById('jobChart').getContext('2d');
     const jobChart = new Chart(ctx, {
         type: 'bar',
@@ -26,5 +32,5 @@
         },
         options: { scales: { y: { beginAtZero: true } } }
     });
-</script>
+    </script>
 {% endblock %}

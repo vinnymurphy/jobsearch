@@ -1,62 +1,63 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>Unemployment Certification Report</h1>
-        <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">Print for Records</button>
-    </div>
-    <p class="text-muted">Reporting Period: {{ report_start }} to {{ report_end }}</p>
-
-    <hr>
-
-    <div class="row">
-        <div class="col-md-6">
-            <h3 class="h5 mb-3"><span class="badge bg-primary">Applications ({{ recent_jobs.count }})</span></h3>
-            <div class="list-group">
-                {% for job in recent_jobs %}
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ job.company.name }}</h5>
-                        <small class="fw-bold">{{ job.created_at|date:"Y/m/d" }}</small>
-                    </div>
-                    <p class="mb-1">{{ job.title }}</p>
-                    {% if job.application_link %}
-                    <div class="btn-group">
-                      <a href="{{ job.application_link }}" target="_blank" class="btn btn-sm btn-outline-info" title="Open Link">
-                        <i class="bi bi-link-45deg"></i> View Post
-                      </a>
-                      <button class="btn btn-sm btn-outline-secondary"
-                              onclick="navigator.clipboard.writeText('{{ job.application_link }}')"
-                              title="Copy to Clipboard">
-                        Copy Link
-                      </button>
-                    </div>
-                    {% endif %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Unemployment Certification Report</h1>
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">Print for Records</button>
+        </div>
+        <p class="text-muted">Reporting Period: {{ report_start }} to {{ report_end }}</p>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <h3 class="h5 mb-3">
+                    <span class="badge bg-primary">Applications ({{ recent_jobs.count }})</span>
+                </h3>
+                <div class="list-group">
+                    {% for job in recent_jobs %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ job.company.name }}</h5>
+                                <small class="fw-bold">{{ job.created_at|date:"Y/m/d" }}</small>
+                            </div>
+                            <p class="mb-1">{{ job.title }}</p>
+                            {% if job.application_link %}
+                                <div class="btn-group">
+                                    <a href="{{ job.application_link }}"
+                                       target="_blank"
+                                       class="btn btn-sm btn-outline-info"
+                                       title="Open Link">
+                                        <i class="bi bi-link-45deg"></i> View Post
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="navigator.clipboard.writeText('{{ job.application_link }}')"
+                                            title="Copy to Clipboard">Copy Link</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No applications found for this period.</p>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p class="text-muted">No applications found for this period.</p>
-                {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <h3 class="h5 mb-3">
+                    <span class="badge bg-success">Interviews ({{ recent_interviews.count }})</span>
+                </h3>
+                <div class="list-group">
+                    {% for interview in recent_interviews %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ interview.job.company.name }}</h5>
+                                <small class="fw-bold">{{ interview.scheduled_time|date:"Y/m/d" }}</small>
+                            </div>
+                            <p class="mb-1">Contact: {{ interview.contact_name|default:"Hiring Manager" }}</p>
+                            <small>Type: {{ interview.get_interview_type_display|default:"Technical/Initial" }}</small>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No interviews found for this period.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-
-        <div class="col-md-6">
-            <h3 class="h5 mb-3"><span class="badge bg-success">Interviews ({{ recent_interviews.count }})</span></h3>
-            <div class="list-group">
-                {% for interview in recent_interviews %}
-                <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ interview.job.company.name }}</h5>
-                        <small class="fw-bold">{{ interview.scheduled_time|date:"Y/m/d" }}</small>
-                    </div>
-                    <p class="mb-1">Contact: {{ interview.contact_name|default:"Hiring Manager" }}</p>
-                    <small>Type: {{ interview.get_interview_type_display|default:"Technical/Initial" }}</small>
-                </div>
-                {% empty %}
-                <p class="text-muted">No interviews found for this period.</p>
-                {% endfor %}
-            </div>
-        </div>
     </div>
-</div>
 {% endblock %}

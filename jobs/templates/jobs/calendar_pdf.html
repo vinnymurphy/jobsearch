@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <style>
+    <head>
+        <style>
         body { font-family: sans-serif; }
         .calendar { width: 100%; border: 1px solid #ccc; }
         /* Add your print-specific styles here */
-    </style>
-</head>
-<body>
-    <h1>Job Schedule for {{ month }}/{{ year }}</h1>
-    {{ calendar|safe }}
-</body>
+        </style>
+    </head>
+    <body>
+        <h1>Job Schedule for {{ month }}/{{ year }}</h1>
+        {{ calendar|safe }}
+    </body>
 </html>
