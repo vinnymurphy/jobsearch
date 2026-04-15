@@ -40,9 +40,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'unemployment_report' %}">Weekly Log</a>
                 </li>
-                <li><a class="nav-link {% if request.resolver_match.url_name == 'unemployment_report' %}active{% endif %}"
--               href="{% url 'unemployment_report' %}">
--              <i class="bi bi-journal-check"></i> Job Log
+                <li><a class="nav-link {% if request.resolver_match.url_name == 'job_create' %}active{% endif %}"
+-               href="{% url 'job_create' %}">
+-              <i class="bi bi-journal-check"></i> Job Create
 -                   </a>
                 </li>
             </ul>
