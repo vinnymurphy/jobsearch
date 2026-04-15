@@ -83,8 +83,7 @@ class JobCreateView(SuccessMessageMixin, generic.CreateView):
 
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
-        date_str = self.kwargs.get("date")
-        if date_str:
+        if date_str := self.kwargs.get("date"):
             initial["applied_date"] = get_date(date_str)
         return initial
 
