@@ -81,6 +81,10 @@ lint:
 	@ruff check .
 	@echo "RESULT: Linting complete."
 	@echo "----------------------------------------------------------------"
+	@echo "BUILD STATUS: Linting with djlint..."
+	@djlint . --check  
+	@echo "RESULT: Linting complete."
+	@echo "----------------------------------------------------------------"
 
 # The "Safety Suite" - Run everything in one go
 check: format test backup
