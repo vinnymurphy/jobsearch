@@ -1,70 +1,85 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>{{ job.title }} at {{ job.company.name }}</title>
-    <style>
+    <head>
+        <title>{{ job.title }} at {{ job.company.name }}</title>
+        <style>
         body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; color: #333; }
         .badge { background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; }
         .company-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
         .interview-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; background: #fafafa; }
         .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; }
-    </style>
-</head>
-<body>
-    <a href="{% url 'calendar' %}" class="back-link">← Back to Calendar</a>
-
-    <div class="company-header">
-        <h1>{{ job.title }}</h1>
-        <p><strong>Company:</strong> <a href="{{ job.company.url }}">{{ job.company.name }}</a></p>
-        <p><strong>Industry:</strong> <span class="badge">{{ job.company.industry.name }}</span></p>
-    </div>
-
-    <h3>About the Company</h3>
-    <p>{{ job.company.description }}</p>
-
-    <hr>
-
-    <h3>Scheduled Interviews</h3>
-    {% for interview in job.interviews.all %}
-        <div class="interview-card">
-            <p><strong>Date:</strong> {{ interview.scheduled_time|date:"F j, Y @ P" }}</p>
-            <p><strong>Interviewer:</strong> {{ interview.interviewer.name }}
-               {% if interview.interviewer.email %}({{ interview.interviewer.email }}){% endif %}</p>
-            {% if interview.feedback %}
-                <p><strong>Notes:</strong> {{ interview.feedback }}</p>
-            {% endif %}
+        </style>
+    </head>
+    <body>
+        <a href="{% url 'calendar' %}" class="back-link">← Back to Calendar</a>
+        <div class="company-header">
+            <h1>{{ job.title }}</h1>
+            <p>
+                <strong>Company:</strong> <a href="{{ job.company.url }}">{{ job.company.name }}</a>
+            </p>
+            <p>
+                <strong>Industry:</strong> <span class="badge">{{ job.company.industry.name }}</span>
+            </p>
         </div>
-    {% empty %}
-        <p>No interviews scheduled yet for this role.</p>
-    {% endfor %}
+        <h3>About the Company</h3>
+        <p>{{ job.company.description }}</p>
+        <hr>
+        <h3>Scheduled Interviews</h3>
+        {% for interview in job.interviews.all %}
+            <div class="interview-card">
+                <p>
+                    <strong>Date:</strong> {{ interview.scheduled_time|date:"F j, Y @ P" }}
+                </p>
+                <p>
+                    <strong>Interviewer:</strong> {{ interview.interviewer.name }}
+                    {% if interview.interviewer.email %}({{ interview.interviewer.email }}){% endif %}
+                </p>
+                {% if interview.feedback %}
+                    <p>
+                        <strong>Notes:</strong> {{ interview.feedback }}
+                    </p>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No interviews scheduled yet for this role.</p>
+        {% endfor %}
         <hr>
         <details style="margin-top: 20px;">
-          <summary style="cursor: pointer; color: #007bff; font-weight: bold;">
-            + Log a New Interview
-          </summary>
-          <div class="interview-card" style="background: #fdfdfd; border: 1px dashed #007bff;">
-            <form method="post">
-              {% csrf_token %}
-              <p>{{ interview_form.interviewer.label_tag }} {{ interview_form.interviewer }}</p>
-              <p>{{ interview_form.scheduled_time.label_tag }} {{ interview_form.scheduled_time }}</p>
-              <p><strong>{{ interview_form.feedback.label }}</strong></p>
-              <div style="display: flex; gap: 20px; margin-bottom: 15px;">
-                <div style="flex: 1;">
-                  {{ interview_form.feedback }}
-                </div>
-                <div style="flex: 1;">
-                  <div id="preview" style="border: 1px solid #ddd; padding: 10px; background: #fff; height: 125px; border-radius: 4px; overflow-y: auto;">
-                    <small style="color: #888;">Markdown Preview...</small>
-                  </div>
-                </div>
-              </div>
-              <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Save Interview
-              </button>
-            </form>
-          </div>
+            <summary style="cursor: pointer; color: #007bff; font-weight: bold;">+ Log a New Interview</summary>
+            <div class="interview-card"
+                 style="background: #fdfdfd;
+                        border: 1px dashed #007bff">
+                <form method="post">
+                    {% csrf_token %}
+                    <p>{{ interview_form.interviewer.label_tag }} {{ interview_form.interviewer }}</p>
+                    <p>{{ interview_form.scheduled_time.label_tag }} {{ interview_form.scheduled_time }}</p>
+                    <p>
+                        <strong>{{ interview_form.feedback.label }}</strong>
+                    </p>
+                    <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                        <div style="flex: 1;">{{ interview_form.feedback }}</div>
+                        <div style="flex: 1;">
+                            <div id="preview"
+                                 style="border: 1px solid #ddd;
+                                        padding: 10px;
+                                        background: #fff;
+                                        height: 125px;
+                                        border-radius: 4px;
+                                        overflow-y: auto">
+                                <small style="color: #888;">Markdown Preview...</small>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit"
+                            style="padding: 10px 20px;
+                                   background-color: #007bff;
+                                   color: white;
+                                   border: none;
+                                   border-radius: 4px;
+                                   cursor: pointer">Save Interview</button>
+                </form>
+            </div>
         </details>
-
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script>
           const textarea = document.querySelector('textarea[name="feedback"]');
@@ -75,7 +90,7 @@
                   preview.innerHTML = marked.parse(textarea.value) || '<small style="color: #888;">Markdown Preview...</small>';
               });
           }
-          </script>
-</details>
+        </script>
+    </details>
 </body>
 </html>

@@ -1,11 +1,9 @@
 {% extends "base.html" %}
-{% block breadcrumbs %}
-<li class="breadcrumb-item active" aria-current="page">Job Calendar</li>
-{% endblock %}
+{% block breadcrumbs %}<li class="breadcrumb-item active" aria-current="page">Job Calendar</li>{% endblock %}
 {% block content %}
-<html>
-  <head>
-    <style>
+    <html>
+        <head>
+            <style>
         .calendar { width: 98%; margin: auto; border-collapse: collapse; }
         .calendar th { padding: 10px; background: #f4f4f4; text-align: center; }
         .calendar td {
@@ -77,37 +75,40 @@
             background-color: #007bff;
             color: white;
         }
-    </style>
-  </head>
-<body>
-  <div class="calendar-navigation" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <div class="d-flex justify-content-between mb-3">
-      <a class="btn btn-outline-primary"
-         href="?year={{ prev_year }}&month={{ prev_month }}">
-        &laquo; Previous Month
-      </a>
-
-      <a class="btn btn-outline-primary"
-         href="?year={{ next_year }}&month={{ next_month }}">
-        Next Month &raquo;
-      </a>
-    </div>
-  </div>
-  <h2>Job Calendar</h2>
-  {{ calendar }}
-  <div class="calendar-legend">
-    <div class="legend-item"><span class="box bg-open"></span> Open / Applied</div>
-    <div class="legend-item"><span class="box bg-draft"></span> Draft / Not Started</div>
-    <div class="legend-item"><span class="box bg-closed"></span> Closed / Rejected</div>
-    <div class="legend-item"><span class="box bg-interview"></span> Scheduled Interview</div>
-</div>
-<div style="margin-top: 20px; text-align: right;">
-    <a href="{% url 'export_pdf' year=year month=month %}" class="btn-print">
-        🖨️ Download PDF Schedule
-    </a>
-</div>
-
-</body>
-
-</html>
+            </style>
+        </head>
+        <body>
+            <div class="calendar-navigation"
+                 style="display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px">
+                <div class="d-flex justify-content-between mb-3">
+                    <a class="btn btn-outline-primary"
+                       href="?year={{ prev_year }}&month={{ prev_month }}">&laquo; Previous Month</a>
+                    <a class="btn btn-outline-primary"
+                       href="?year={{ next_year }}&month={{ next_month }}">Next Month &raquo;</a>
+                </div>
+            </div>
+            <h2>Job Calendar</h2>
+            {{ calendar }}
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="box bg-open"></span> Open / Applied
+                </div>
+                <div class="legend-item">
+                    <span class="box bg-draft"></span> Draft / Not Started
+                </div>
+                <div class="legend-item">
+                    <span class="box bg-closed"></span> Closed / Rejected
+                </div>
+                <div class="legend-item">
+                    <span class="box bg-interview"></span> Scheduled Interview
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <a href="{% url 'export_pdf' year=year month=month %}" class="btn-print">🖨️ Download PDF Schedule</a>
+            </div>
+        </body>
+    </html>
 {% endblock %}

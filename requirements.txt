@@ -1,6 +1,7 @@
 black
 Django
 django-debug-toolbar
+djlint
 factory_boy
 ipython
 isort

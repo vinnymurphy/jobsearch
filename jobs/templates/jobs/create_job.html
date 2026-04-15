@@ -1,16 +1,16 @@
 <html>
-  <head>
-<title>Job Form</title>
-</head>
-<body>
-  <h1>Job Form</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-  </form>
-<address>
-<a href="mailto:murphy.vinny@gmail.com"></a>
-</address>
-</body>
+    <head>
+        <title>Job Form</title>
+    </head>
+    <body>
+        <h1>Job Form</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save</button>
+        </form>
+        <address>
+            <a href="mailto:murphy.vinny@gmail.com"></a>
+        </address>
+    </body>
 </html>
