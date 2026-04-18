@@ -8,6 +8,7 @@ from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count
+from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -22,7 +23,9 @@ def dashboard_view(request):
     # Aggregate job counts by company
     performance_data = (
         Job.objects.values("company__name")
-        .annotate(total=Count("id"))
+        .annotate(
+            total=Count("id"), company_name_lower=Lower("company__name")
+        )
         .order_by("-total")
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
