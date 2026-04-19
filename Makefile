@@ -7,47 +7,36 @@ BACKUP_DIR = backups
 TIMESTAMP = $(shell date +%F_%H%M%S)
 
 
-.PHONY: help setup install migrate run test shell clean
+.PHONY: help setup install migrate run test shell clean backup restore format lint all
 
-help:
-	@echo "Available commands:"
-	@echo "  make setup    - Create venv and install dependencies"
-	@echo "  make migrate  - Generate and apply database migrations"
-	@echo "  make run      - Start the Django development server"
-	@echo "  make test     - Run the test suite (Performance & Logic)"
-	@echo "  make shell    - Open the Django interactive shell"
-	@echo "  make backup   - Export database to timestamped JSON"
-	@echo "  make restore  - Load data from the most recent backup file"
-	@echo "  make format   - run ruff check --fix on the code base
-	@echo "  make lint     - run ruff check on the code base
-	@echo "  make check    - Safety Suite where we run format, test, backup
-	@echo "  make clean    - Remove __pycache__ and build artifacts"
+help: ## Display this help screen
+	@perl -ne 'printf "\033[36m%-15s\033[0m %s\n", $$1, $$2 if /^([a-zA-Z_-]+):.*##\s*(.*)$$/' $(MAKEFILE_LIST) | sort
 
-setup:
+setup:  ## Create venv and install dependencies
 	@echo "[INFO] Initializing Virtual Environment..."
 	python3 -m venv $(VENV)
 	$(BIN)/pip install --upgrade pip
 	$(BIN)/pip install -r requirements.txt
 	@echo "[SUCCESS] Environment ready. Run 'make migrate' next."
 
-migrate:
+migrate: ## Generate and apply database migrations
 	$(MANAGE) makemigrations
 	$(MANAGE) migrate
 
-run:
+run: ## Start the Django development server
 	$(MANAGE) runserver
 
-test:
+test: ## Run the test suite (Performance & Logic)
 	$(MANAGE) test -v 2 jobs
 
-shell:
+shell: ## Open the Django interactive shell
 	$(MANAGE) shell
 
-clean:
+clean: ## Clean .pyc and __pycache__ files
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -delete
 
-backup:
+backup: ## Export database to timestamped JSON
 	@mkdir -p $(BACKUP_DIR)
 	@echo "----------------------------------------------------------------"
 	@echo "BUILD STATUS: Exporting JobSearch data..."
@@ -56,40 +45,37 @@ backup:
 	@echo "RESULT: Backup completed successfully at $(shell date)."
 	@echo "----------------------------------------------------------------"
 
-restore:
+restore: ## Load data from the most recent backup file
 	@echo "----------------------------------------------------------------"
 	@echo "BUILD STATUS: Restoring latest data state..."
 	@$(MANAGE) loaddata $(shell ls -t $(BACKUP_DIR)/*.json | head -1)
 	@echo "RESULT: Database synchronized with $(shell ls -t $(BACKUP_DIR)/*.json | head -1)"
 	@echo "----------------------------------------------------------------"
 
-.PHONY: help install migrate run test shell clean backup restore format lint
 
-# ... (keep existing targets) ...
-
-format:
+format: ## Fix lint-like tasks on the code base
 	@echo "----------------------------------------------------------------"
 	@echo "BUILD STATUS: Formatting with Ruff..."
-	@ruff format .
-	@ruff check --fix .
+	@$(BIN)/ruff format .
+	@$(BIN)/ruff check --fix .
 	@echo "BUILD STATUS: Formatting with djlint..."
-	@djlint . --reformat
+	@$(BIN)/djlint . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
 	@echo "----------------------------------------------------------------"
 
-lint:
+lint:  ## Run lint-like check on the code base
 	@echo "----------------------------------------------------------------"
 	@echo "BUILD STATUS: Linting with Ruff..."
-	@ruff check .
+	@$(BIN)/ruff check .
 	@echo "RESULT: Linting complete."
 	@echo "----------------------------------------------------------------"
 	@echo "BUILD STATUS: Linting with djlint..."
-	@djlint . --check  
+	@$(BIN)/djlint . --check
 	@echo "RESULT: Linting complete."
 	@echo "----------------------------------------------------------------"
 
 # The "Safety Suite" - Run everything in one go
-check: format test backup
+check: format test backup  ## Safety Suite where we run format, test, backup
 	@echo "----------------------------------------------------------------"
 	@echo "PIPELINE STATUS: ALL CHECKS PASSED"
 	@echo "----------------------------------------------------------------"
