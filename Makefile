@@ -50,15 +50,16 @@ restore: ## Load data from the most recent backup file
 
 
 format: ## Fix lint-like tasks on the code base
+	@echo "BUILD STATUS: Formatting with Ruff and djlint..."
 	@$(BIN)/ruff format . && \
-	@$(BIN)/ruff check --fix . && \
-	@$(BIN)/djlint . --reformat
+	$(BIN)/ruff check --fix . && \
+	$(BIN)/djlint . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
 
 lint:  ## Run lint-like check on the code base
 	@echo "BUILD STATUS: Linting with Ruff and djlint..."
 	@$(BIN)/ruff check . && \
-	@$(BIN)/djlint . --check
+	$(BIN)/djlint . --check
 	@echo "RESULT: Linting complete."
 
 # The "Safety Suite" - Run everything in one go
