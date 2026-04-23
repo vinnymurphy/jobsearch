@@ -77,6 +77,7 @@ class Job(models.Model):
         ("draft", "Draft"),
         ("open", "Open"),
         ("applied", "Applied"),
+        ("negotiating", "Negotiating"),
         ("interviewing", "Interviewing"),
         ("rejected", "Rejected"),
         ("closed", "Closed"),
