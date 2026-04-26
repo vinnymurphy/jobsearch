@@ -24,7 +24,7 @@ migrate: ## Generate and apply database migrations
 	$(MANAGE) migrate
 
 run: ## Start the Django development server
-	$(MANAGE) runserver
+	$(MANAGE) runserver 127.0.0.1:8080
 
 test: ## Run the test suite (Performance & Logic)
 	$(MANAGE) test -v 2 jobs
