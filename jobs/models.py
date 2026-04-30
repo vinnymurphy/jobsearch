@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -137,11 +139,26 @@ class Job(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"{self.company}-{self.title}")
-        counter = 1
-        while Job.objects.filter(slug=self.slug).exists():
-            self.slug = slugify(f"{self.company}-{self.title}-{counter}")
-            counter += 1
+            base_slug = slugify(f"{self.company}-{self.title}")
+
+            # Find all existing slugs starting with this base in one query
+            existing = Job.objects.filter(
+                slug__startswith=base_slug
+            ).values_list("slug", flat=True)
+
+            if base_slug in existing:
+                pattern = re.compile(rf"^{re.escape(base_slug)}-(\d+)$")
+                suffixes = [
+                    int(m.group(1))
+                    for s in existing
+                    if (m := pattern.match(s))
+                ]
+                self.slug = (
+                    f"{base_slug}-{max(suffixes) + 1 if suffixes else 1}"
+                )
+            else:
+                self.slug = base_slug
+
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
