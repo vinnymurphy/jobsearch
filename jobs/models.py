@@ -1,7 +1,17 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+def validate_not_reserved(value):
+    if value.lower() == "add":
+        raise ValidationError(
+            "The slug 'add' is reserved for system routing."
+        )
 
 
 class Industry(models.Model):
@@ -47,6 +57,9 @@ class Interviewer(models.Model):
         related_name="interviewers",
     )
 
+    class Meta:
+        unique_together = ("name", "company")
+
     def __str__(self):
         return self.name
 
@@ -62,78 +75,100 @@ class Interview(models.Model):
     scheduled_time = models.DateTimeField()
     feedback = models.TextField(blank=True)
 
+    class Meta:
+        ordering = ["-scheduled_time"]
+
     def __str__(self):
         return f"Interview with {self.candidate_name} for {self.job.title}"
 
 
 class Job(models.Model):
-    JOB_TYPE_CHOICES = [
-        ("FT", "Full-Time"),
-        ("PT", "Part-Time"),
-        ("CT", "Contract"),
-        ("IN", "Internship"),
-    ]
-    STATUS_CHOICES = [
-        ("draft", "Draft"),
-        ("open", "Open"),
-        ("applied", "Applied"),
-        ("negotiating", "Negotiating"),
-        ("interviewing", "Interviewing"),
-        ("rejected", "Rejected"),
-        ("closed", "Closed"),
-    ]
-    LEVEL_CHOICES = [
-        ("SR", "Senior"),
-        ("ST", "Staff"),
-        ("PR", "Principal"),
-        ("LD", "Lead"),
-    ]
-    WORK_MODE_CHOICES = [
-        ("remote", "Remote"),
-        ("onsite", "On-site"),
-        ("hybrid", "Hybrid"),
-    ]
+    class JobType(models.TextChoices):
+        FULL_TIME = "FT", "Full-Time"
+        PART_TIME = "PT", "Part-Time"
+        CONTRACT = "CT", "Contract"
+        INTERNSHIP = "IN", "Internship"
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        OPEN = "open", "Open"
+        APPLIED = "applied", "Applied"
+        NEGOTIATING = "negotiating", "Negotiating"
+        INTERVIEWING = "interviewing", "Interviewing"
+        REJECTED = "rejected", "Rejected"
+        CLOSED = "closed", "Closed"
+
+    class Level(models.TextChoices):
+        SENIOR = "SR", "Senior"
+        STAFF = "ST", "Staff"
+        PRINCIPAL = "PR", "Principal"
+        LEAD = "LD", "Lead"
+
+    class WorkMode(models.TextChoices):
+        REMOTE = "remote", "Remote"
+        ONSITE = "onsite", "On-site"
+        HYBRID = "hybrid", "Hybrid"
+
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     company = models.ForeignKey(
         Company, on_delete=models.CASCADE, related_name="jobs"
     )
 
-    location = models.CharField(
-        max_length=150
-    )  # e.g., "Remote" or "New York, NY"
-    level = models.CharField(max_length=2, choices=LEVEL_CHOICES, blank=True)
+    location = models.CharField(max_length=150)
+    level = models.CharField(max_length=2, choices=Level.choices, blank=True)
 
     # Salary range (optional)
     salary_min = models.PositiveIntegerField(null=True, blank=True)
     salary_max = models.PositiveIntegerField(null=True, blank=True)
 
     job_type = models.CharField(
-        max_length=2, choices=JOB_TYPE_CHOICES, default="FT"
+        max_length=2, choices=JobType.choices, default=JobType.FULL_TIME
     )
     status = models.CharField(
-        max_length=12, choices=STATUS_CHOICES, default="open"
+        max_length=12,
+        choices=Status.choices,
+        default=Status.OPEN,
+        db_index=True,
     )
     work_mode = models.CharField(
-        max_length=10, choices=WORK_MODE_CHOICES, default="onsite"
+        max_length=10, choices=WorkMode.choices, default=WorkMode.ONSITE
     )
-    applied_date = models.DateField(default=timezone.now)
+    applied_date = models.DateField(default=timezone.now, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(
+        unique=True, blank=True, validators=[validate_not_reserved]
+    )
     expiry_date = models.DateField(null=True, blank=True)
     posted_by = models.CharField(max_length=255, blank=True)
     application_link = models.URLField(blank=True, max_length=1000)
 
-    slug = models.SlugField(unique=True, blank=True)
+    class Meta:
+        ordering = ["-applied_date"]
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"{self.company}-{self.title}")
-        counter = 1
-        while Job.objects.filter(slug=self.slug).exists():
-            self.slug = slugify(f"{self.company}-{self.title}-{counter}")
-            counter += 1
+            base_slug = slugify(f"{self.company}-{self.title}")
+
+            # Find all existing slugs starting with this base in one query
+            existing = Job.objects.filter(
+                slug__startswith=base_slug
+            ).values_list("slug", flat=True)
+
+            if base_slug in existing or base_slug == "add":
+                pattern = re.compile(rf"^{re.escape(base_slug)}-(\d+)$")
+                suffixes = [
+                    int(m.group(1))
+                    for s in existing
+                    if (m := pattern.match(s))
+                ]
+                self.slug = (
+                    f"{base_slug}-{max(suffixes) + 1 if suffixes else 1}"
+                )
+            else:
+                self.slug = base_slug
+
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

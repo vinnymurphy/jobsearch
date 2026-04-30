@@ -1,9 +1,8 @@
-from jobs.models import Industry, Job
+from jobs.models import Company, Industry, Job
 
 import csv
 
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 
 class Command(BaseCommand):
@@ -40,20 +39,21 @@ Sr. Software System Designer (Continuous Integration),AMD,2026-02-26"""
         count = 0
         for row in reader:
             title = row["Job Title"].strip()
-            company = row["Company"].strip()
+            company_name = row["Company"].strip()
+
+            # Resolve the Company object to satisfy the ForeignKey constraint
+            company_obj, _ = Company.objects.get_or_create(
+                name=company_name, defaults={"industry": default_industry}
+            )
 
             # Create the Job record
             # update_or_create prevents duplicates if you run the script twice
             job, created = Job.objects.update_or_create(
                 title=title,
-                company=company,
+                company=company_obj,
                 defaults={
-                    "industry": default_industry,
                     "status": "open",
                     "description": f"Automated import from {row['Date']}",
-                    # slug is handled by the model's save() method usually,
-                    # but we can force it here:
-                    "slug": slugify(f"{company}-{title}")[:50],
                 },
             )
             if created:

@@ -1,13 +1,13 @@
 from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
 from .models import Interview, Job
-from .utils import MasterCalendar, get_date
+from .utils import MasterCalendar, get_date, get_unemployment_week
 
 from collections import OrderedDict
 from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -121,14 +121,36 @@ class JobView(generic.ListView):
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
         today = timezone.now().date()
+
+        # Calculate end of month for a cleaner range query
+        last_day_of_month = next_month_date.replace(day=1) - timedelta(days=1)
+        job_end_date = min(last_day_of_month, today)
+
+        query = self.request.GET.get("q")
+
         jobs = Job.objects.filter(
-            applied_date__year=year,
-            applied_date__month=month,
-            applied_date__lte=today,
+            applied_date__range=(first_day_of_month, job_end_date)
         ).select_related("company")
+
+        # Interviews range (handle datetime boundaries)
+        start_dt = timezone.make_aware(timezone.datetime(year, month, 1))
+        end_dt = timezone.make_aware(
+            timezone.datetime(year, month, last_day_of_month.day, 23, 59, 59)
+        )
+
         interviews = Interview.objects.filter(
-            scheduled_time__year=year, scheduled_time__month=month
-        ).select_related("job__company")
+            scheduled_time__range=(start_dt, end_dt)
+        ).select_related("job__company", "interviewer")
+
+        if query:
+            jobs = jobs.filter(
+                Q(title__icontains=query) | Q(company__name__icontains=query)
+            )
+            interviews = interviews.filter(
+                Q(job__title__icontains=query)
+                | Q(job__company__name__icontains=query)
+            )
+
         jobs_by_day = {}
         for job in jobs:
             d = job.applied_date.day
@@ -141,6 +163,7 @@ class JobView(generic.ListView):
         cal = MasterCalendar(
             year,
             month,
+            search_query=query,
         )
         html_cal = cal.formatmonth(
             withyear=True,
@@ -154,27 +177,18 @@ class JobView(generic.ListView):
         context["next_month"] = next_month_date.month
         context["year"] = year
         context["month"] = month
+        context["search_query"] = query
         return context
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = InterviewForm(request.POST)
-        if form.is_valid():
-            interview = form.save(commit=False)
-            interview.job = self.object  # Automatically link to this job
-            interview.save()
-            return redirect("job_detail", pk=self.object.pk)
-        return self.render_to_response(self.get_context_data(form=form))
 
 
 class InterviewDetailView(generic.DetailView):
-    model = Interview
+    queryset = Interview.objects.select_related("job__company", "interviewer")
     template_name = "jobs/interview_detail.html"
     context_object_name = "interview"
 
 
 class JobDetailView(generic.DetailView):
-    model = Job
+    queryset = Job.objects.select_related("company")
     template_name = "jobs/job_detail.html"
     context_object_name = "job"
 
@@ -195,7 +209,7 @@ class JobDetailView(generic.DetailView):
                 interview = form.save(commit=False)
                 interview.job = self.object
                 interview.save()
-                return redirect("job_detail", pk=self.object.pk)
+                return redirect("job_detail", slug=self.object.slug)
             # If invalid, return with the specific form errors
             return self.render_to_response(
                 self.get_context_data(interview_form=form)
@@ -207,7 +221,7 @@ class JobDetailView(generic.DetailView):
                 interviewer = form.save(commit=False)
                 interviewer.company = self.object.company
                 interviewer.save()
-                return redirect("job_detail", pk=self.object.pk)
+                return redirect("job_detail", slug=self.object.slug)
             # If invalid, return with the specific form errors
             return self.render_to_response(
                 self.get_context_data(interviewer_form=form)
@@ -216,15 +230,6 @@ class JobDetailView(generic.DetailView):
         # Fallback: If somehow the POST reached here without a valid
         # button name
         return self.render_to_response(self.get_context_data())
-
-
-def get_unemployment_week(d):
-    # Adjust to the previous Sunday unless it's already Sunday
-    start = (
-        d if d.weekday() == 6 else d - timedelta(days=(d.weekday() + 1) % 7)
-    )
-    end = start + timedelta(days=6)
-    return start, end
 
 
 class UnemploymentReportView(generic.ListView):
