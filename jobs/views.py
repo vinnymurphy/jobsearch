@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -121,14 +121,28 @@ class JobView(generic.ListView):
         prev_month_date = first_day_of_month - timedelta(days=1)
         next_month_date = first_day_of_month + timedelta(days=32)
         today = timezone.now().date()
+
+        query = self.request.GET.get("q")
+
         jobs = Job.objects.filter(
             applied_date__year=year,
             applied_date__month=month,
             applied_date__lte=today,
         ).select_related("company")
+
         interviews = Interview.objects.filter(
             scheduled_time__year=year, scheduled_time__month=month
         ).select_related("job__company")
+
+        if query:
+            jobs = jobs.filter(
+                Q(title__icontains=query) | Q(company__name__icontains=query)
+            )
+            interviews = interviews.filter(
+                Q(job__title__icontains=query)
+                | Q(job__company__name__icontains=query)
+            )
+
         jobs_by_day = {}
         for job in jobs:
             d = job.applied_date.day
@@ -154,6 +168,7 @@ class JobView(generic.ListView):
         context["next_month"] = next_month_date.month
         context["year"] = year
         context["month"] = month
+        context["search_query"] = query
         return context
 
     def post(self, request, *args, **kwargs):
