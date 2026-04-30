@@ -163,7 +163,7 @@ class JobView(generic.ListView):
             interview = form.save(commit=False)
             interview.job = self.object  # Automatically link to this job
             interview.save()
-            return redirect("job_detail", pk=self.object.pk)
+            return redirect("job_detail", slug=self.object.slug)
         return self.render_to_response(self.get_context_data(form=form))
 
 
@@ -195,7 +195,7 @@ class JobDetailView(generic.DetailView):
                 interview = form.save(commit=False)
                 interview.job = self.object
                 interview.save()
-                return redirect("job_detail", pk=self.object.pk)
+                return redirect("job_detail", slug=self.object.slug)
             # If invalid, return with the specific form errors
             return self.render_to_response(
                 self.get_context_data(interview_form=form)
@@ -207,7 +207,7 @@ class JobDetailView(generic.DetailView):
                 interviewer = form.save(commit=False)
                 interviewer.company = self.object.company
                 interviewer.save()
-                return redirect("job_detail", pk=self.object.pk)
+                return redirect("job_detail", slug=self.object.slug)
             # If invalid, return with the specific form errors
             return self.render_to_response(
                 self.get_context_data(interviewer_form=form)

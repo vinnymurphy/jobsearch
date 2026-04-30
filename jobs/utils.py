@@ -59,7 +59,7 @@ class MasterCalendar(calendar.HTMLCalendar):
         for job in day_jobs:
             status_class = status_map.get(job.status, "bg-secondary")
             name = job.company.name if job.company else "Unknown Company"
-            url = reverse("job_detail", args=[job.id])
+            url = job.get_absolute_url()
 
             events_html.append(
                 f'<div class="job-entry {status_class} '
