@@ -1,6 +1,6 @@
 from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
 from .models import Interview, Job
-from .utils import MasterCalendar, get_date
+from .utils import MasterCalendar, get_date, get_unemployment_week
 
 from collections import OrderedDict
 from datetime import date, timedelta
@@ -216,15 +216,6 @@ class JobDetailView(generic.DetailView):
         # Fallback: If somehow the POST reached here without a valid
         # button name
         return self.render_to_response(self.get_context_data())
-
-
-def get_unemployment_week(d):
-    # Adjust to the previous Sunday unless it's already Sunday
-    start = (
-        d if d.weekday() == 6 else d - timedelta(days=(d.weekday() + 1) % 7)
-    )
-    end = start + timedelta(days=6)
-    return start, end
 
 
 class UnemploymentReportView(generic.ListView):
