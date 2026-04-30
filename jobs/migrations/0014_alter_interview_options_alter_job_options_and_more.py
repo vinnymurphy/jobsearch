@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("jobs", "0013_alter_job_status"),
     ]
@@ -22,7 +21,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="job",
             name="applied_date",
-            field=models.DateField(db_index=True, default=django.utils.timezone.now),
+            field=models.DateField(
+                db_index=True, default=django.utils.timezone.now
+            ),
         ),
         migrations.AlterField(
             model_name="job",

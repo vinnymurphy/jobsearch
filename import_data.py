@@ -7,7 +7,7 @@ import django
 # Setup Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
-from jobs.models import Company, Interview, Job  # noqa: E402
+from jobs.models import Company, Interview, Interviewer, Job  # noqa: E402
 
 from django.utils.timezone import make_aware  # noqa: E402
 
@@ -18,6 +18,7 @@ def run_import():
         for row in reader:
             co_name = row["Company"].strip()
             role_name = row["Role"].strip()
+            interviewer_name = row["Interviewers"].strip()
 
             # 1. Handle Timezone
             naive_dt = datetime.strptime(row["Date"], "%Y-%m-%d")
@@ -30,9 +31,14 @@ def run_import():
             ).first()
 
             if job_obj:
+                # Get or create interviewer based on unique name +
+                # company constraint
+                interviewer_obj, _ = Interviewer.objects.get_or_create(
+                    name=interviewer_name, company=job_obj.company
+                )
                 Interview.objects.create(
                     job=job_obj,
-                    interviewer_name=row["Interviewers"],
+                    interviewer=interviewer_obj,
                     scheduled_time=aware_dt,
                     feedback=f"Initial contact for {role_name}",
                 )
@@ -47,9 +53,13 @@ def run_import():
                 new_job = Job.objects.create(
                     title=role_name, company=company_obj, status="open"
                 )
+                # Get or create interviewer for the placeholder company
+                interviewer_obj, _ = Interviewer.objects.get_or_create(
+                    name=interviewer_name, company=company_obj
+                )
                 Interview.objects.create(
                     job=new_job,
-                    interviewer_name=row["Interviewers"],
+                    interviewer=interviewer_obj,
                     scheduled_time=aware_dt,
                 )
 
