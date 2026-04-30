@@ -3,7 +3,6 @@ from jobs.models import Company, Industry, Job
 import csv
 
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 
 class Command(BaseCommand):
@@ -55,9 +54,6 @@ Sr. Software System Designer (Continuous Integration),AMD,2026-02-26"""
                 defaults={
                     "status": "open",
                     "description": f"Automated import from {row['Date']}",
-                    # slug is handled by the model's save() method usually,
-                    # but we can force it here:
-                    "slug": slugify(f"{company_name}-{title}")[:50],
                 },
             )
             if created:

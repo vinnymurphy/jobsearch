@@ -1,9 +1,17 @@
 import re
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+def validate_not_reserved(value):
+    if value.lower() == "add":
+        raise ValidationError(
+            "The slug 'add' is reserved for system routing."
+        )
 
 
 class Industry(models.Model):
@@ -129,7 +137,9 @@ class Job(models.Model):
     applied_date = models.DateField(default=timezone.now, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    slug = models.SlugField(unique=True, blank=True)
+    slug = models.SlugField(
+        unique=True, blank=True, validators=[validate_not_reserved]
+    )
     expiry_date = models.DateField(null=True, blank=True)
     posted_by = models.CharField(max_length=255, blank=True)
     application_link = models.URLField(blank=True, max_length=1000)
@@ -146,7 +156,7 @@ class Job(models.Model):
                 slug__startswith=base_slug
             ).values_list("slug", flat=True)
 
-            if base_slug in existing:
+            if base_slug in existing or base_slug == "add":
                 pattern = re.compile(rf"^{re.escape(base_slug)}-(\d+)$")
                 suffixes = [
                     int(m.group(1))
