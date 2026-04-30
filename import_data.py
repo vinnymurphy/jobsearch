@@ -24,13 +24,9 @@ def run_import():
             naive_dt = datetime.strptime(row["Date"], "%Y-%m-%d")
             aware_dt = make_aware(naive_dt)
 
-            # 2. Robust Job Lookup We look for a job at that company
-            # where the title matches the role
-            job_obj = Job.objects.filter(
+            if job_obj := Job.objects.filter(
                 company__name__iexact=co_name, title__icontains=role_name
-            ).first()
-
-            if job_obj:
+            ).first():
                 # Get or create interviewer based on unique name +
                 # company constraint
                 interviewer_obj, _ = Interviewer.objects.get_or_create(

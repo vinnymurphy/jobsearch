@@ -122,17 +122,25 @@ class JobView(generic.ListView):
         next_month_date = first_day_of_month + timedelta(days=32)
         today = timezone.now().date()
 
+        # Calculate end of month for a cleaner range query
+        last_day_of_month = next_month_date.replace(day=1) - timedelta(days=1)
+        job_end_date = min(last_day_of_month, today)
+
         query = self.request.GET.get("q")
 
         jobs = Job.objects.filter(
-            applied_date__year=year,
-            applied_date__month=month,
-            applied_date__lte=today,
+            applied_date__range=(first_day_of_month, job_end_date)
         ).select_related("company")
 
+        # Interviews range (handle datetime boundaries)
+        start_dt = timezone.make_aware(timezone.datetime(year, month, 1))
+        end_dt = timezone.make_aware(
+            timezone.datetime(year, month, last_day_of_month.day, 23, 59, 59)
+        )
+
         interviews = Interview.objects.filter(
-            scheduled_time__year=year, scheduled_time__month=month
-        ).select_related("job__company")
+            scheduled_time__range=(start_dt, end_dt)
+        ).select_related("job__company", "interviewer")
 
         if query:
             jobs = jobs.filter(
@@ -172,25 +180,15 @@ class JobView(generic.ListView):
         context["search_query"] = query
         return context
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = InterviewForm(request.POST)
-        if form.is_valid():
-            interview = form.save(commit=False)
-            interview.job = self.object  # Automatically link to this job
-            interview.save()
-            return redirect("job_detail", slug=self.object.slug)
-        return self.render_to_response(self.get_context_data(form=form))
-
 
 class InterviewDetailView(generic.DetailView):
-    model = Interview
+    queryset = Interview.objects.select_related("job__company", "interviewer")
     template_name = "jobs/interview_detail.html"
     context_object_name = "interview"
 
 
 class JobDetailView(generic.DetailView):
-    model = Job
+    queryset = Job.objects.select_related("company")
     template_name = "jobs/job_detail.html"
     context_object_name = "job"
 
