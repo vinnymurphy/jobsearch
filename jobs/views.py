@@ -155,6 +155,7 @@ class JobView(generic.ListView):
         cal = MasterCalendar(
             year,
             month,
+            search_query=query,
         )
         html_cal = cal.formatmonth(
             withyear=True,

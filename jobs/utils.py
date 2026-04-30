@@ -1,7 +1,9 @@
 import calendar
+import re
 from datetime import date, timedelta
 
 from django.urls import reverse
+from django.utils.html import escape
 
 
 def get_date(req_day):
@@ -35,10 +37,27 @@ def next_month(d):
 
 
 class MasterCalendar(calendar.HTMLCalendar):
-    def __init__(self, year=None, month=None):
+    def __init__(self, year=None, month=None, search_query=None):
         self.year = year
         self.month = month
+        self.search_query = search_query
         super().__init__(firstweekday=calendar.SUNDAY)
+
+    def _highlight(self, text):
+        """Escapes text and wraps matches of self.search_query in
+        <mark> tags."""
+        if not self.search_query:
+            return escape(text)
+
+        pattern = re.compile(re.escape(self.search_query), re.IGNORECASE)
+        parts = pattern.split(text)
+        matches = pattern.findall(text)
+
+        result = escape(parts[0])
+        for i, match in enumerate(matches):
+            result += f'<mark class="p-0">{escape(match)}</mark>'
+            result += escape(parts[i + 1])
+        return result
 
     def formatday(self, day, weekday, jobs, interviews):
         if day == 0:
@@ -58,24 +77,34 @@ class MasterCalendar(calendar.HTMLCalendar):
 
         for job in day_jobs:
             status_class = status_map.get(job.status, "bg-secondary")
-            name = job.company.name if job.company else "Unknown Company"
+            name = (
+                self._highlight(job.company.name)
+                if job.company
+                else "Unknown Company"
+            )
+            title = self._highlight(job.title)
             url = job.get_absolute_url()
 
             events_html.append(
                 f'<div class="job-entry {status_class} '
                 'p-1 mb-1 small rounded">'
                 f'<li class="calendar-event"><a href="{url}" target="_blank">'
-                f"{name}</a>: {job.title}</li>"
+                f"{name}</a>: {title}</li>"
                 "</div>"
             )
 
         for interview in day_interviews:
             url = reverse("interview_detail", args=[interview.id])
-            title = interview.job.title if interview.job else "Unknown"
+            display_text = self._highlight(str(interview))
+            title = (
+                self._highlight(interview.job.title)
+                if interview.job
+                else "Unknown"
+            )
             events_html.append(
                 f'<li class="calendar-event bg-interview p-1 '
                 'mb-1 small rounded">'
-                f'<a href="{url}">{interview}</a> ({title})</li>'
+                f'<a href="{url}">{display_text}</a> ({title})</li>'
             )
 
         content = "".join(events_html)
