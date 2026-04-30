@@ -1,5 +1,5 @@
 import calendar
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from django.urls import reverse
 
@@ -48,7 +48,7 @@ class MasterCalendar(calendar.HTMLCalendar):
         day_interviews = interviews.get(day, [])
 
         events_html = []
-        
+
         # Map statuses to Bootstrap classes
         status_map = {
             "rejected": "bg-danger-subtle text-danger border-danger",
@@ -60,18 +60,21 @@ class MasterCalendar(calendar.HTMLCalendar):
             status_class = status_map.get(job.status, "bg-secondary")
             name = job.company.name if job.company else "Unknown Company"
             url = reverse("job_detail", args=[job.id])
-            
+
             events_html.append(
-                f'<div class="job-entry {status_class} p-1 mb-1 small rounded">'
-                f'<li class="calendar-event"><a href="{url}" target="_blank">{name}</a>: {job.title}</li>'
-                '</div>'
+                f'<div class="job-entry {status_class} '
+                'p-1 mb-1 small rounded">'
+                f'<li class="calendar-event"><a href="{url}" target="_blank">'
+                f"{name}</a>: {job.title}</li>"
+                "</div>"
             )
 
         for interview in day_interviews:
             url = reverse("interview_detail", args=[interview.id])
             title = interview.job.title if interview.job else "Unknown"
             events_html.append(
-                f'<li class="calendar-event bg-interview p-1 mb-1 small rounded">'
+                f'<li class="calendar-event bg-interview p-1 '
+                'mb-1 small rounded">'
                 f'<a href="{url}">{interview}</a> ({title})</li>'
             )
 
