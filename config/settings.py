@@ -26,6 +26,14 @@ SECRET_KEY = (
     "django-insecure-n&1n^plfgv$@midp%l(hl-&qixl(4us&^q5&+ga6!_u1@zon5x"
 )
 
+# Celery Configuration Options
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"  # Or your local timezone
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

@@ -1,10 +1,12 @@
 black
+celery
 Django
 django-debug-toolbar
 djlint
 factory_boy
 ipython
 isort
+redis
 ruff
 sourcery-cli
 weasyprint

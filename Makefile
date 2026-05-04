@@ -1,13 +1,33 @@
 # JobSearch Project Automation
 VENV = venv
-BIN = $(VENV)/bin
-PYTHON = $(BIN)/python3
-MANAGE = $(PYTHON) manage.py
-BACKUP_DIR = backups
-TIMESTAMP := $(shell date +%F_%H%M%S)
+
+BIN        := $(VENV)/bin
+PYTHON     := $(BIN)/python3
+MANAGE     := $(PYTHON) manage.py
+BACKUP_DIR := backups
+TIMESTAMP  := $(shell date +%F_%H%M%S)
+
+CELERY := $(BIN)/celery
+DJLINT := $(BIN)/djlint
+PIP    := $(BIN)/pip
+RUFF   := $(BIN)/ruff
 
 
-.PHONY: help setup install migrate run test shell clean backup restore format lint all
+
+.PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis
+
+# Start the local Redis container
+redis:
+	@if ! podman ps | grep -q redis-local; then \
+		echo "Starting Redis..."; \
+		podman run -d --name redis-local --net=host docker.io/library/redis:7; \
+	else \
+		echo "Redis is already running."; \
+	fi
+
+# Dependency: redis must be 'ready' before worker starts
+worker: redis
+	$(CELERY) -A config worker -l info
 
 help: ## Display this help screen
 	@perl -ne 'printf "\033[36m%-15s\033[0m %s\n", $$1, $$2 if /^([a-zA-Z_-]+):.*##\s*(.*)$$/' $(MAKEFILE_LIST) | sort
@@ -15,8 +35,8 @@ help: ## Display this help screen
 setup:  ## Create venv and install dependencies
 	@echo "[INFO] Initializing Virtual Environment..."
 	python3 -m venv $(VENV) && \
-	$(BIN)/pip install --upgrade pip && \
-	$(BIN)/pip install -r requirements.txt
+	$(PIP) install --upgrade pip && \
+	$(PIP) install -r requirements.txt
 	@echo "[SUCCESS] Environment ready. Run 'make migrate' next."
 
 migrate: ## Generate and apply database migrations
@@ -51,15 +71,15 @@ restore: ## Load data from the most recent backup file
 
 format: ## Fix lint-like tasks on the code base
 	@echo "BUILD STATUS: Formatting with Ruff and djlint..."
-	@$(BIN)/ruff format . && \
-	$(BIN)/ruff check --fix . && \
-	$(BIN)/djlint . --reformat
+	@$(RUFF) format . && \
+	$(RUFF) check --fix . && \
+	$(DJLINT) . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
 
 lint:  ## Run lint-like check on the code base
 	@echo "BUILD STATUS: Linting with Ruff and djlint..."
-	@$(BIN)/ruff check . && \
-	$(BIN)/djlint . --check
+	@$(RUFF) check . && \
+	$(DJLINT) . --check
 	@echo "RESULT: Linting complete."
 
 # The "Safety Suite" - Run everything in one go
