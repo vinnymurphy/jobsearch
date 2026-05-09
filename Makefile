@@ -1,4 +1,8 @@
 # JobSearch Project Automation
+
+-include .env
+export
+
 VENV = venv
 
 BIN        := $(VENV)/bin
@@ -40,7 +44,7 @@ migrate: ## Generate and apply database migrations
 	$(MANAGE) makemigrations
 	$(MANAGE) migrate
 
-run: ## Start the Django development server
+run: redis ## Start the Django development server
 	$(MANAGE) runserver 127.0.0.1:8080
 
 test: ## Run the test suite (Performance & Logic)
