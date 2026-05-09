@@ -3,16 +3,13 @@ VENV = venv
 
 BIN        := $(VENV)/bin
 PYTHON     := $(BIN)/python3
-MANAGE     := $(PYTHON) manage.py
 BACKUP_DIR := backups
+CELERY     := $(BIN)/celery
+DJLINT     := $(BIN)/djlint
+MANAGE     := $(PYTHON) manage.py
+PIP        := $(BIN)/pip
+RUFF       := $(BIN)/ruff
 TIMESTAMP  := $(shell date +%F_%H%M%S)
-
-CELERY := $(BIN)/celery
-DJLINT := $(BIN)/djlint
-PIP    := $(BIN)/pip
-RUFF   := $(BIN)/ruff
-
-
 
 .PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis
 
@@ -20,7 +17,7 @@ RUFF   := $(BIN)/ruff
 redis:
 	@if ! podman ps | grep -q redis-local; then \
 		echo "Starting Redis..."; \
-		podman run -d --name redis-local --net=host docker.io/library/redis:7; \
+		podman run -d --replace --name redis-local --net=host docker.io/library/redis:7; \
 	else \
 		echo "Redis is already running."; \
 	fi

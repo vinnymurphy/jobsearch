@@ -4,11 +4,13 @@ from .views import (
     JobCreateView,
     JobDetailView,
     JobView,
+    chat_view,
     dashboard_view,
     export_calendar_pdf,
 )
-
+from datetime import timedelta
 from django.urls import path
+
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),
@@ -35,4 +37,5 @@ urlpatterns = [
         UnemploymentView.as_view(),
         name="unemployment_report",
     ),
+    path("api/chat/", chat_view, name="chat"),
 ]

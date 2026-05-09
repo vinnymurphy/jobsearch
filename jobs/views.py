@@ -6,6 +6,7 @@ from collections import OrderedDict
 from datetime import date, timedelta
 from typing import Any
 
+from django.conf import settings
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
@@ -16,7 +17,44 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
+from openai import OpenAI
 from weasyprint import HTML
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.conf import settings
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
+
+@api_view(["POST"])
+def chat_view(request):
+    user_input = request.data.get("message")
+
+    if not user_input:
+        return Response(
+            {"error": "No message provided"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        response = client.responses.create(
+            model="gpt-5.5-2026-04-23",
+            input=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_input},
+            ],
+        )
+        output_text = (
+            response.output[0].content[0].text if response.output else ""
+        )
+        return Response({"response": output_text})
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 def dashboard_view(request):

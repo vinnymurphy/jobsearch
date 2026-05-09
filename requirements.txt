@@ -1,11 +1,17 @@
 black
 celery
 Django
+djangorestframework
 django-debug-toolbar
 djlint
+dotenv
 factory_boy
 ipython
 isort
+langchain_openai
+langgraph
+matplotlib
+python-dotenv
 redis
 ruff
 sourcery-cli
