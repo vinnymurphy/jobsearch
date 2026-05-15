@@ -1,9 +1,9 @@
-from typing import TypedDict, List
-from langgraph.graph import StateGraph, END
+from typing import TypedDict
+
 
 class CoachState(TypedDict):
     job_description: str
     resume_text: str
-    technical_gaps: List[str]
+    technical_gaps: list[str]
     match_score: int
     interview_strategy: str

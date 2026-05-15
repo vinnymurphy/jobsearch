@@ -18,12 +18,10 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
 from openai import OpenAI
-from weasyprint import HTML
-
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
-from django.conf import settings
+from weasyprint import HTML
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 

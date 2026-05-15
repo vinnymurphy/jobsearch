@@ -92,5 +92,83 @@
           }
         </script>
     </details>
+    <!-- Job Coaching Chat Widget -->
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Interview Coach</h5>
+            <span class="badge bg-light text-primary">AI Powered</span>
+        </div>
+        <div class="card-body">
+            <div id="chat-window"
+                 style="height: 300px;
+                        overflow-y: auto;
+                        border: 1px solid #eee;
+                        padding: 15px;
+                        border-radius: 5px;
+                        background: #f9f9f9">
+                <div class="text-muted small mb-3">
+                    <em>Coach: "I've analyzed the {{ job.title }} role. How can I help you prepare?"</em>
+                </div>
+            </div>
+            <div class="input-group mt-3">
+                <input type="text"
+                       id="chat-input"
+                       class="form-control"
+                       placeholder="Ask about technical gaps or strategy...">
+                <button class="btn btn-primary" type="button" id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatWindow = document.getElementById('chat-window');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function appendMessage(role, text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `mb-2 p-2 rounded ${role === 'user' ? 'bg-info text-white ms-auto' : 'bg-light border'}`;
+        msgDiv.style.maxWidth = '80%';
+        msgDiv.style.width = 'fit-content';
+        msgDiv.innerHTML = `<strong>${role === 'user' ? 'You' : 'Coach'}:</strong> ${text}`;
+        chatWindow.appendChild(msgDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        appendMessage('user', message);
+        chatInput.value = '';
+
+        try {
+            const response = await fetch('/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}' // Django security requirement
+                },
+                body: JSON.stringify({
+                    message: message,
+                    job_id: "{{ job.id }}" // Pass the context we set up in views.py
+                })
+            });
+
+            const data = await response.json();
+            if (data.response) {
+                appendMessage('coach', data.response);
+            } else {
+                appendMessage('coach', 'Error: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            appendMessage('coach', 'System error: Could not reach the server.');
+        }
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+});
+    </script>
 </body>
 </html>

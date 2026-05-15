@@ -1,6 +1,7 @@
-from langgraph.graph import StateGraph, END
-from .coach_state import CoachState
 from .coach_nodes import analyzer_node, scorer_node, strategist_node
+from .coach_state import CoachState
+
+from langgraph.graph import END, StateGraph
 
 workflow = StateGraph(CoachState)
 

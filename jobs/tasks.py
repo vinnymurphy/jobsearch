@@ -4,7 +4,6 @@ import logging
 
 from celery import shared_task
 from django.utils import timezone
-from jobs.agents import interview_coach
 
 logger = logging.getLogger(__name__)
 

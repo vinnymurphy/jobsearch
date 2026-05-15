@@ -8,9 +8,8 @@ from .views import (
     dashboard_view,
     export_calendar_pdf,
 )
-from datetime import timedelta
-from django.urls import path
 
+from django.urls import path
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),
