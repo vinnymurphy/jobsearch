@@ -13,25 +13,25 @@ class UnemploymentView(generic.ListView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        days_back = self.request.GET.get("days", 7)
+        n_days = self.request.GET.get("days", 7)
         try:
-            days_back = int(days_back)
-            if days_back < 1:
+            n_days = int(n_days)
+            if n_days < 1:
                 raise ValueError
         except (ValueError, TypeError):
-            days_back = 7  # Default to 7 days if invalid input
-        today = timezone.now()
-        seven_days_ago = today - timedelta(days=days_back)
+            n_days = 7  # Default to 7 days if invalid input
+        today = timezone.now().date()
+        days_back = today - timedelta(days=n_days)
         context["recent_jobs"] = (
-            Job.objects.filter(applied_date__gte=seven_days_ago)
+            Job.objects.filter(applied_date__gte=days_back)
             .select_related("company")
             .order_by("-applied_date")
         )
         context["recent_interviews"] = (
-            Interview.objects.filter(scheduled_time__gte=seven_days_ago)
+            Interview.objects.filter(scheduled_time__gte=days_back)
             .select_related("job__company")
             .order_by("-scheduled_time")
         )
-        context["report_start_date"] = seven_days_ago
+        context["report_start_date"] = days_back
         context["report_end_date"] = today
         return context

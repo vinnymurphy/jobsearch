@@ -17,8 +17,7 @@ TIMESTAMP  := $(shell date +%F_%H%M%S)
 
 .PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis
 
-# Start the local Redis container
-redis:
+redis:  ### Start Redis container if not already running
 	@if ! podman ps | grep -q redis-local; then \
 		echo "Starting Redis..."; \
 		podman run -d --replace --name redis-local --net=host docker.io/library/redis:7; \
@@ -27,7 +26,7 @@ redis:
 	fi
 
 # Dependency: redis must be 'ready' before worker starts
-worker: redis
+worker: redis ### Start Celery worker for asynchronous tasks
 	$(CELERY) -A config worker -l info
 
 help: ## Display this help screen
@@ -53,9 +52,10 @@ test: ## Run the test suite (Performance & Logic)
 shell: ## Open the Django interactive shell
 	$(MANAGE) shell
 
-clean: ## Clean .pyc and __pycache__ files
-	find . -name "*.pyc" -delete
+clean: ## Clean .pyc, __pycache__ files and emacs backup files
+	find . -name "*.py[co]" -delete
 	find . -name "__pycache__" -delete
+	find . -name "*~" -delete"
 
 backup: ## Export database to timestamped JSON
 	@mkdir -p $(BACKUP_DIR)
