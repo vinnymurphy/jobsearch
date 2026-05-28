@@ -1,17 +1,18 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>{{ job.title }} at {{ job.company.name }}</title>
-        <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 20px; color: #333; }
-        .badge { background: #eee; padding: 4px 8px; border-radius: 4px; font-size: 0.9em; }
-        .company-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
-        .interview-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; background: #fafafa; }
-        .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; }
-        </style>
-    </head>
-    <body>
-        <a href="{% url 'calendar' %}" class="back-link">← Back to Calendar</a>
+{% extends 'base.html' %}
+{% block content %}
+    <style>
+    .company-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
+    .interview-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-top: 10px; background: #fafafa; }
+    </style>
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'calendar' %}">Calendar</a>
+                </li>
+                <li class="breadcrumb-item active">{{ job.title }}</li>
+            </ol>
+        </nav>
         <div class="company-header">
             <h1>{{ job.title }}</h1>
             <p>
@@ -51,8 +52,15 @@
                         border: 1px dashed #007bff">
                 <form method="post">
                     {% csrf_token %}
-                    <p>{{ interview_form.interviewer.label_tag }} {{ interview_form.interviewer }}</p>
-                    <p>{{ interview_form.scheduled_time.label_tag }} {{ interview_form.scheduled_time }}</p>
+                    <input type="hidden" name="job" value="{{ job.id }}">
+                    <div class="mb-3">
+                        {{ interview_form.interviewer.label_tag }}
+                        <div class="input-group">{{ interview_form.interviewer }}</div>
+                    </div>
+                    <div class="mb-3">
+                        {{ interview_form.scheduled_time.label_tag }}
+                        <div class="input-group">{{ interview_form.scheduled_time }}</div>
+                    </div>
                     <p>
                         <strong>{{ interview_form.feedback.label }}</strong>
                     </p>
@@ -82,44 +90,42 @@
         </details>
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script>
-          const textarea = document.querySelector('textarea[name="feedback"]');
-          const preview = document.getElementById('preview');
-
-          if (textarea) {
-              textarea.addEventListener('input', () => {
-                  preview.innerHTML = marked.parse(textarea.value) || '<small style="color: #888;">Markdown Preview...</small>';
-              });
-          }
+            const textarea = document.querySelector('textarea[name="feedback"]');
+            const preview = document.getElementById('preview');
+            if (textarea) {
+                textarea.addEventListener('input', () => {
+                    preview.innerHTML = marked.parse(textarea.value) || '<small style="color: #888;">Markdown Preview...</small>';
+                });
+            }
         </script>
-    </details>
-    <!-- Job Coaching Chat Widget -->
-    <div class="card mt-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Interview Coach</h5>
-            <span class="badge bg-light text-primary">AI Powered</span>
-        </div>
-        <div class="card-body">
-            <div id="chat-window"
-                 style="height: 300px;
-                        overflow-y: auto;
-                        border: 1px solid #eee;
-                        padding: 15px;
-                        border-radius: 5px;
-                        background: #f9f9f9">
-                <div class="text-muted small mb-3">
-                    <em>Coach: "I've analyzed the {{ job.title }} role. How can I help you prepare?"</em>
+        <!-- Job Coaching Chat Widget -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Interview Coach</h5>
+                <span class="badge bg-light text-primary">AI Powered</span>
+            </div>
+            <div class="card-body">
+                <div id="chat-window"
+                     style="height: 300px;
+                            overflow-y: auto;
+                            border: 1px solid #eee;
+                            padding: 15px;
+                            border-radius: 5px;
+                            background: #f9f9f9">
+                    <div class="text-muted small mb-3">
+                        <em>Coach: "I've analyzed the {{ job.title }} role. How can I help you prepare?"</em>
+                    </div>
+                </div>
+                <div class="input-group mt-3">
+                    <input type="text"
+                           id="chat-input"
+                           class="form-control"
+                           placeholder="Ask about technical gaps or strategy...">
+                    <button class="btn btn-primary" type="button" id="send-btn">Send</button>
                 </div>
             </div>
-            <div class="input-group mt-3">
-                <input type="text"
-                       id="chat-input"
-                       class="form-control"
-                       placeholder="Ask about technical gaps or strategy...">
-                <button class="btn btn-primary" type="button" id="send-btn">Send</button>
-            </div>
         </div>
-    </div>
-    <script>
+        <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatWindow = document.getElementById('chat-window');
     const chatInput = document.getElementById('chat-input');
@@ -169,6 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 });
-    </script>
-</body>
-</html>
+        </script>
+    </div>
+{% endblock %}

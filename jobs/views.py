@@ -222,6 +222,11 @@ class InterviewDetailView(generic.DetailView):
     template_name = "jobs/interview_detail.html"
     context_object_name = "interview"
 
+    def post(self, request, *args, **kwargs):
+        interview = self.get_object()
+        interview.feedback = request.POST.get("feedback", "")
+        interview.save()
+        return redirect("interview_detail", pk=interview.pk)
 
 class JobDetailView(generic.DetailView):
     queryset = Job.objects.select_related("company")
