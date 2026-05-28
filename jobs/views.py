@@ -228,6 +228,7 @@ class InterviewDetailView(generic.DetailView):
         interview.save()
         return redirect("interview_detail", pk=interview.pk)
 
+
 class JobDetailView(generic.DetailView):
     queryset = Job.objects.select_related("company")
     template_name = "jobs/job_detail.html"
