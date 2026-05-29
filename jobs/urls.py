@@ -1,4 +1,4 @@
-from .unemployment import UnemploymentView
+from .unemployment import JobSearchReportView
 from .views import (
     InterviewDetailView,
     JobCreateView,
@@ -33,7 +33,7 @@ urlpatterns = [
     ),
     path(
         "unemployment-report/",
-        UnemploymentView.as_view(),
+        JobSearchReportView.as_view(),
         name="unemployment_report",
     ),
     path("api/chat/", chat_view, name="chat"),
