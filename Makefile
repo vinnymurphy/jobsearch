@@ -27,6 +27,7 @@ redis:  ### Start Redis container if not already running
 
 # Dependency: redis must be 'ready' before worker starts
 worker: redis ### Start Celery worker for asynchronous tasks
+	@echo starting $(CELERY) -A config worker -l info
 	$(CELERY) -A config worker -l info
 
 help: ## Display this help screen
@@ -43,7 +44,7 @@ migrate: ## Generate and apply database migrations
 	$(MANAGE) makemigrations
 	$(MANAGE) migrate
 
-run: redis ## Start the Django development server
+run: worker ## Start the Django development server
 	$(MANAGE) runserver 127.0.0.1:8080
 
 test: ## Run the test suite (Performance & Logic)
