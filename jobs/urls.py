@@ -39,9 +39,9 @@ urlpatterns = [
         name="unemployment_report",
     ),
     path(
-    "favicon.ico",
-    RedirectView.as_view(url=staticfiles_storage.url("favicon.svg")),
-    name="favicon",
-),
+        "favicon.ico",
+        RedirectView.as_view(url=staticfiles_storage.url("favicon.svg")),
+        name="favicon",
+    ),
     path("api/chat/", chat_view, name="chat"),
 ]
