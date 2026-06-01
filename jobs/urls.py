@@ -9,7 +9,9 @@ from .views import (
     export_calendar_pdf,
 )
 
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),
@@ -36,5 +38,10 @@ urlpatterns = [
         JobSearchReportView.as_view(),
         name="unemployment_report",
     ),
+    path(
+    "favicon.ico",
+    RedirectView.as_view(url=staticfiles_storage.url("favicon.svg")),
+    name="favicon",
+),
     path("api/chat/", chat_view, name="chat"),
 ]
