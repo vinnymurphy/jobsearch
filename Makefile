@@ -5,19 +5,20 @@ export
 
 VENV = venv
 
-BIN        := $(VENV)/bin
-PYTHON     := $(BIN)/python3
-BACKUP_DIR := backups
-CELERY     := $(BIN)/celery
-DJLINT     := $(BIN)/djlint
-MANAGE     := $(PYTHON) manage.py
-PIP        := $(BIN)/pip
-RUFF       := $(BIN)/ruff
-TIMESTAMP  := $(shell date +%F_%H%M%S)
+BIN           := $(VENV)/bin
+PYTHON        := $(BIN)/python3
+BACKUP_DIR    := backups
+CELERY        := $(BIN)/celery
+DJLINT        := $(BIN)/djlint
+MANAGE        := $(PYTHON) manage.py
+PIP           := $(BIN)/pip
+RUFF          := $(BIN)/ruff
+TIMESTAMP     := $(shell date +%F_%H%M%S)
+CELERY_WORKER := $(CELERY) -A config worker -l info
 
 .PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis
 
-redis:  ### Start Redis container if not already running
+redis: ### Start Redis container if not already running
 	@if ! podman ps | grep -q redis-local; then \
 		echo "Starting Redis..."; \
 		podman run -d --replace --name redis-local --net=host docker.io/library/redis:7; \
@@ -26,10 +27,18 @@ redis:  ### Start Redis container if not already running
 	fi
 
 # Dependency: redis must be 'ready' before worker starts
-worker: redis ### Start Celery worker for asynchronous tasks
-	@echo starting $(CELERY) -A config worker -l info
-	$(CELERY) -A config worker -l info
+-worker: redis ### Start Celery worker for asynchronous tasks
 
+# Keep this standalone in case you ever want to run a dedicated worker in another tab
+worker: redis ### Start Celery worker for asynchronous tasks (Foreground)
+	@echo starting $(CELERY) -A config worker -l info
+	$(CELERY_WORKER)
+
+run: redis ## Start Django server and background Celery worker together
+	@echo "Starting $(CELERY_WORKER)"
+	$(CELERY_WORKER) &
+	@echo"Starting Django development server..."
+	$(MANAGE) runserver 127.0.0.1:8080
 help: ## Display this help screen
 	@perl -ne 'printf "\033[36m%-15s\033[0m %s\n", $$1, $$2 if /^([a-zA-Z_-]+):.*##\s*(.*)$$/' $(MAKEFILE_LIST) | sort
 
@@ -43,9 +52,6 @@ setup:  ## Create venv and install dependencies
 migrate: ## Generate and apply database migrations
 	$(MANAGE) makemigrations
 	$(MANAGE) migrate
-
-run: worker ## Start the Django development server
-	$(MANAGE) runserver 127.0.0.1:8080
 
 test: ## Run the test suite (Performance & Logic)
 	$(MANAGE) test -v 2 jobs
