@@ -37,7 +37,7 @@ worker: redis ### Start Celery worker for asynchronous tasks (Foreground)
 run: redis ## Start Django server and background Celery worker together
 	@echo "Starting $(CELERY_WORKER)"
 	$(CELERY_WORKER) &
-	@echo"Starting Django development server..."
+	@echo "Starting Django development server..."
 	$(MANAGE) runserver 127.0.0.1:8080
 help: ## Display this help screen
 	@perl -ne 'printf "\033[36m%-15s\033[0m %s\n", $$1, $$2 if /^([a-zA-Z_-]+):.*##\s*(.*)$$/' $(MAKEFILE_LIST) | sort
