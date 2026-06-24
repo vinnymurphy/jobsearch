@@ -88,16 +88,18 @@ restore: ## Load data from the most recent backup file
 	@echo "RESULT: Database synchronized with $$LATEST" || \
 	@echo "ERROR: No backup files found in $(BACKUP_DIR)"
 
-format: check-tools  ## Fix lint-like tasks on the code base
-	@echo "Formatting..."
 
-check-tools:
-	@command -v $(RUFF) >/dev/null || { echo "ERROR: ruff not installed"; exit 1; }
-	@command -v $(DJLINT) >/dev/null || { echo "ERROR: djlint not installed"; exit 1; }
-	@command -v $(RUFF) format . && \
+check-tools:  ## Check if required tools (ruff and djlint) are installed
+	@command -v $(RUFF) >/dev/null || { echo "ERROR: $(RUFF) not installed"; exit 1; }
+	@command -v $(DJLINT) >/dev/null || { echo "ERROR: $(DJLINT) not installed"; exit 1; }
+
+format: check-tools  ## Format codebase with Ruff and djlint
+	@echo "BUILD STATUS: Formatting with Ruff and djlint..."
+	@$(RUFF) format . && \
 	$(RUFF) check --fix . && \
 	$(DJLINT) . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
+
 
 lint:  ## Run lint-like check on the code base
 	@echo "BUILD STATUS: Linting with Ruff and djlint..."
