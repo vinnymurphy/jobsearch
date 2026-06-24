@@ -3,6 +3,10 @@
 -include .env
 export
 
+.SHELL      := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+MAKEFLAGS   += --warn-undefined-variables
+
 VENV = venv
 
 BIN           := $(VENV)/bin
@@ -16,7 +20,12 @@ RUFF          := $(BIN)/ruff
 TIMESTAMP     := $(shell date +%F_%H%M%S)
 CELERY_WORKER := $(CELERY) -A config worker -l info
 
-.PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis
+.PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis .DEFAULT_GOAL
+
+.DEFAULT_GOAL := help
+
+all: setup migrate
+	@echo "[SUCCESS] Full setup complete!"
 
 redis: ### Start Redis container if not already running
 	@if ! podman ps | grep -q redis-local; then \
@@ -73,13 +82,19 @@ backup: ## Export database to timestamped JSON
 
 restore: ## Load data from the most recent backup file
 	@echo "BUILD STATUS: Restoring latest data state..."
-	@$(MANAGE) loaddata $(shell ls -t $(BACKUP_DIR)/*.json | head -1)
-	@echo "RESULT: Database synchronized with $(shell ls -t $(BACKUP_DIR)/*.json | head -1)"
+	@LATEST=$$(ls -t $(BACKUP_DIR)/*.json 2>/dev/null | head -1) && \
+	[ -n "$$LATEST" ] && \
+	@$(MANAGE) loaddata $$LATEST && \
+	@echo "RESULT: Database synchronized with $$LATEST" || \
+	@echo "ERROR: No backup files found in $(BACKUP_DIR)"
 
+format: check-tools  ## Fix lint-like tasks on the code base
+	@echo "Formatting..."
 
-format: ## Fix lint-like tasks on the code base
-	@echo "BUILD STATUS: Formatting with Ruff and djlint..."
-	@$(RUFF) format . && \
+check-tools:
+	@command -v $(RUFF) >/dev/null || { echo "ERROR: ruff not installed"; exit 1; }
+	@command -v $(DJLINT) >/dev/null || { echo "ERROR: djlint not installed"; exit 1; }
+	@command -v $(RUFF) format . && \
 	$(RUFF) check --fix . && \
 	$(DJLINT) . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
