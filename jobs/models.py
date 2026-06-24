@@ -248,9 +248,7 @@ class Job(models.Model):
             if base_slug in existing or base_slug == "add":
                 pattern = re.compile(rf"^{re.escape(base_slug)}-(\d+)$")
                 suffixes = [
-                    int(m.group(1))
-                    for s in existing
-                    if (m := pattern.match(s))
+                    int(m[1]) for s in existing if (m := pattern.match(s))
                 ]
                 self.slug = (
                     f"{base_slug}-{max(suffixes) + 1 if suffixes else 1}"
