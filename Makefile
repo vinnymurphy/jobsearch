@@ -66,7 +66,7 @@ test: ## Run the test suite (Performance & Logic)
 	$(MANAGE) test -v 2 jobs
 
 shell: ## Open the Django interactive shell
-	$(MANAGE) shell
+	$(MANAGE) shell $(ARGS)
 
 clean: ## Clean .pyc, __pycache__ files and emacs backup files
 	find . -name "*.py[co]" -delete
