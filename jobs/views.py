@@ -176,7 +176,9 @@ class JobView(generic.ListView):
 
         interviews = Interview.objects.filter(
             scheduled_time__range=(start_dt, end_dt)
-        ).select_related("job__company", "interviewer")
+        ).select_related("job__company", "interviewer").order_by(
+            "scheduled_time"
+        )
 
         if query:
             jobs = jobs.filter(
@@ -193,7 +195,7 @@ class JobView(generic.ListView):
             jobs_by_day.setdefault(d, []).append(job)
         interviews_by_day = {}
         for interview in interviews:
-            d = interview.scheduled_time.day
+            d = timezone.localtime(interview.scheduled_time).day
             interviews_by_day.setdefault(d, []).append(interview)
 
         cal = MasterCalendar(

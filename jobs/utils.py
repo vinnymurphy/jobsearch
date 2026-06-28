@@ -3,6 +3,8 @@ import re
 from datetime import date, timedelta
 
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.html import escape
 
 
@@ -95,6 +97,10 @@ class MasterCalendar(calendar.HTMLCalendar):
 
         for interview in day_interviews:
             url = reverse("interview_detail", args=[interview.id])
+            scheduled_time = date_format(
+                timezone.localtime(interview.scheduled_time),
+                "TIME_FORMAT",
+            )
             display_text = self._highlight(str(interview))
             title = (
                 self._highlight(interview.job.title)
@@ -104,6 +110,7 @@ class MasterCalendar(calendar.HTMLCalendar):
             events_html.append(
                 f'<li class="calendar-event bg-interview p-1 '
                 'mb-1 small rounded">'
+                f'<span class="fw-semibold">{scheduled_time}</span> '
                 f'<a href="{url}">{display_text}</a> ({title})</li>'
             )
 
