@@ -70,6 +70,37 @@ class JobPerformanceTest(TestCase):
             self.assertEqual(response.status_code, 200)
 
 
+class JobDetailStatusTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.company = Company.objects.create(name="Test Corp")
+        self.job = Job.objects.create(
+            title="Software Engineer",
+            company=self.company,
+            status=Job.Status.OPEN,
+        )
+
+    def test_can_change_job_status_from_detail(self):
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.post(
+            url, {"transition_status": Job.Status.INTERVIEWING}
+        )
+
+        self.job.refresh_from_db()
+        self.assertRedirects(response, url)
+        self.assertEqual(self.job.status, Job.Status.INTERVIEWING)
+
+    def test_invalid_status_does_not_change_job(self):
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.post(url, {"transition_status": "bogus"})
+
+        self.job.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.job.status, Job.Status.OPEN)
+
+
 class UnemploymentReportingTests(TestCase):
     """Test suite for the Sunday-to-Saturday logical windowing system.
     Ensures compliance with state-mandated reporting periods.
