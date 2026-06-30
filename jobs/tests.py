@@ -73,12 +73,22 @@ class JobPerformanceTest(TestCase):
 class JobDetailStatusTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.company = Company.objects.create(name="Test Corp")
+        self.industry = Industry.objects.create(name="Software")
+        self.company = Company.objects.create(
+            name="Test Corp", industry=self.industry
+        )
         self.job = Job.objects.create(
             title="Software Engineer",
             company=self.company,
             status=Job.Status.OPEN,
         )
+
+    def test_detail_shows_company_industry(self):
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "Software")
 
     def test_can_change_job_status_from_detail(self):
         url = reverse("job_detail", kwargs={"slug": self.job.slug})
