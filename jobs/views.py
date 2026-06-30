@@ -232,7 +232,7 @@ class InterviewDetailView(generic.DetailView):
 
 
 class JobDetailView(generic.DetailView):
-    queryset = Job.objects.select_related("company")
+    queryset = Job.objects.select_related("company__industry")
     template_name = "jobs/job_detail.html"
     context_object_name = "job"
 

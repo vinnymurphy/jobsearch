@@ -19,7 +19,12 @@
                 <strong>Company:</strong> <a href="{{ job.company.url }}">{{ job.company.name }}</a>
             </p>
             <p>
-                <strong>Industry:</strong> <span class="badge">{{ job.company.industry.name }}</span>
+                <strong>Industry:</strong>
+                {% if job.company.industry %}
+                    <span class="badge bg-info text-dark">{{ job.company.industry.name }}</span>
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
             </p>
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <form method="post" class="d-flex align-items-center gap-2 flex-wrap m-0">
