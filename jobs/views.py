@@ -242,10 +242,18 @@ class JobDetailView(generic.DetailView):
             "interviewer"
         ).order_by("-scheduled_time")
         context["form"] = InterviewForm()
+        context["status_choices"] = Job.Status.choices
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
+
+        transition_status = request.POST.get("transition_status")
+        valid_statuses = {choice.value for choice in Job.Status}
+        if transition_status in valid_statuses:
+            self.object.status = transition_status
+            self.object.save(update_fields=["status", "updated_at"])
+            return redirect("job_detail", slug=self.object.slug)
 
         if "submit_interview" in request.POST:
             form = InterviewForm(request.POST)
