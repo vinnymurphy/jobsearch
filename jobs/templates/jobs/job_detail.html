@@ -21,6 +21,21 @@
             <p>
                 <strong>Industry:</strong> <span class="badge">{{ job.company.industry.name }}</span>
             </p>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <form method="post" class="d-flex align-items-center gap-2 flex-wrap m-0">
+                    {% csrf_token %}
+                    <label for="transition-status" class="form-label fw-bold mb-0">Status:</label>
+                    <select id="transition-status"
+                            name="transition_status"
+                            class="form-select form-select-sm"
+                            style="width: auto">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if job.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                </form>
+            </div>
         </div>
         <h3>About the Company</h3>
         <p>{{ job.company.description }}</p>
