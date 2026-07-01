@@ -224,8 +224,21 @@ class InterviewDetailView(generic.DetailView):
     template_name = "jobs/interview_detail.html"
     context_object_name = "interview"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["status_choices"] = Job.Status.choices
+        return context
+
     def post(self, request, *args, **kwargs):
         interview = self.get_object()
+
+        transition_status = request.POST.get("transition_status")
+        valid_statuses = {choice.value for choice in Job.Status}
+        if transition_status in valid_statuses:
+            interview.job.status = transition_status
+            interview.job.save(update_fields=["status", "updated_at"])
+            return redirect("interview_detail", pk=interview.pk)
+
         interview.feedback = request.POST.get("feedback", "")
         interview.save()
         return redirect("interview_detail", pk=interview.pk)
