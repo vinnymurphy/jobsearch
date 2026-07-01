@@ -1,8 +1,8 @@
 black
 celery
 Django
-djangorestframework
 django-debug-toolbar
+djangorestframework
 djlint
 dotenv
 factory_boy
@@ -12,6 +12,7 @@ langchain_openai
 langgraph
 markdown
 matplotlib
+pypdf
 python-dotenv
 redis
 ruff

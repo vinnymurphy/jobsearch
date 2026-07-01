@@ -5,6 +5,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+from pypdf import PdfReader
 
 
 def validate_not_reserved(value):
@@ -12,6 +13,73 @@ def validate_not_reserved(value):
         raise ValidationError(
             "The slug 'add' is reserved for system routing."
         )
+
+
+class Resume(models.Model):
+    name = models.CharField(
+        max_length=100,
+        help_text="Name of the resume (e.g., 'Software Engineer Resume')",
+    )
+    raw_text = models.TextField(
+        help_text="The extracted plain text used for LLM context processing."
+    )
+    pdf_file = models.FileField(
+        upload_to="resumes/",
+        blank=True,
+        null=True,
+        help_text="Optional original PDF storage.",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text=(
+            "Designates if this is the primary resume "
+            "for default match comparisons."
+        ),
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now,
+        help_text="Timestamp when the resume was created.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Resumes"
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.name} (Active: {self.is_active})"
+
+    def save(self, *args, **kwargs):
+        # If a file is uploaded and raw_text is missing, extract it
+        # right away
+        if self.pdf_file and not self.raw_text:
+            try:
+                # Open the file stream directly from the FileField
+                # memory/storage
+                reader = PdfReader(self.pdf_file)
+                extracted_pages = []
+
+                for page in reader.pages:
+                    if text := page.extract_text():
+                        extracted_pages.append(text)
+
+                # Join all pages with standard newlines and save to
+                # the database field
+                self.raw_text = "\n\n".join(extracted_pages).strip()
+
+            except Exception as e:
+                # Falling back gracefully so file saves don't
+                # hard-crash the app if a PDF is corrupted
+                self.raw_text = (
+                    "[ERROR] Failed to automatically parse text "
+                    f"from PDF: {str(e)}"
+                )
+        if self.is_active:
+            # Deactivate other resumes
+            Resume.objects.filter(is_active=True).exclude(pk=self.pk).update(
+                is_active=False
+            )
+        super().save(*args, **kwargs)
 
 
 class Industry(models.Model):
@@ -180,9 +248,7 @@ class Job(models.Model):
             if base_slug in existing or base_slug == "add":
                 pattern = re.compile(rf"^{re.escape(base_slug)}-(\d+)$")
                 suffixes = [
-                    int(m.group(1))
-                    for s in existing
-                    if (m := pattern.match(s))
+                    int(m[1]) for s in existing if (m := pattern.match(s))
                 ]
                 self.slug = (
                     f"{base_slug}-{max(suffixes) + 1 if suffixes else 1}"
