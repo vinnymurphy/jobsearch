@@ -1,4 +1,4 @@
-from .models import Company, Industry, Job
+from .models import Company, Industry, Interview, Job
 from .utils import get_unemployment_week
 
 from datetime import date
@@ -6,6 +6,7 @@ from datetime import date
 import factory
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 
 # Simple Factory to generate test data
@@ -109,6 +110,44 @@ class JobDetailStatusTests(TestCase):
         self.job.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.job.status, Job.Status.OPEN)
+
+
+class InterviewDetailStatusTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.company = Company.objects.create(name="Test Corp")
+        self.job = Job.objects.create(
+            title="Software Engineer",
+            company=self.company,
+            status=Job.Status.OPEN,
+        )
+        self.interview = Interview.objects.create(
+            job=self.job,
+            scheduled_time=timezone.now(),
+            feedback="Existing notes",
+        )
+
+    def test_detail_shows_job_status_choices(self):
+        url = reverse("interview_detail", kwargs={"pk": self.interview.pk})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "Job Status:")
+        self.assertContains(response, "Interviewing")
+        self.assertContains(response, "Rejected")
+
+    def test_can_change_job_status_from_interview_detail(self):
+        url = reverse("interview_detail", kwargs={"pk": self.interview.pk})
+
+        response = self.client.post(
+            url, {"transition_status": Job.Status.NEGOTIATING}
+        )
+
+        self.job.refresh_from_db()
+        self.interview.refresh_from_db()
+        self.assertRedirects(response, url)
+        self.assertEqual(self.job.status, Job.Status.NEGOTIATING)
+        self.assertEqual(self.interview.feedback, "Existing notes")
 
 
 class UnemploymentReportingTests(TestCase):

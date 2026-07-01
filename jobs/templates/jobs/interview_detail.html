@@ -4,6 +4,24 @@
 {% block content %}
     <div class="container mt-4">
         <h1>Interview with {{ interview.job.company }}</h1>
+        <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+            <form method="post"
+                  action="{% url 'interview_detail' interview.pk %}"
+                  class="d-flex align-items-center gap-2 flex-wrap m-0">
+                {% csrf_token %}
+                <label for="transition-status" class="form-label fw-bold mb-0">Job Status:</label>
+                <select id="transition-status"
+                        name="transition_status"
+                        class="form-select form-select-sm"
+                        style="width: auto">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}"
+                                {% if interview.job.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+            </form>
+        </div>
         <hr>
         <!-- DISPLAYING THE RENDERED MARKDOWN -->
         {% if interview.feedback %}
