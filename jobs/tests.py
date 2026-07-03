@@ -111,6 +111,19 @@ class JobDetailStatusTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.job.status, Job.Status.OPEN)
 
+    def test_interview_feedback_renders_markdown(self):
+        Interview.objects.create(
+            job=self.job,
+            scheduled_time=timezone.now(),
+            feedback="**Great fit**\n\n- Follow up",
+        )
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "<strong>Great fit</strong>", html=True)
+        self.assertContains(response, "<li>Follow up</li>", html=True)
+
 
 class InterviewDetailStatusTests(TestCase):
     def setUp(self):
