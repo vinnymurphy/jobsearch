@@ -174,10 +174,10 @@ class JobView(generic.ListView):
             timezone.datetime(year, month, last_day_of_month.day, 23, 59, 59)
         )
 
-        interviews = Interview.objects.filter(
-            scheduled_time__range=(start_dt, end_dt)
-        ).select_related("job__company", "interviewer").order_by(
-            "scheduled_time"
+        interviews = (
+            Interview.objects.filter(scheduled_time__range=(start_dt, end_dt))
+            .select_related("job__company", "interviewer")
+            .order_by("scheduled_time")
         )
 
         if query:
