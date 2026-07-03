@@ -174,10 +174,10 @@ class JobView(generic.ListView):
             timezone.datetime(year, month, last_day_of_month.day, 23, 59, 59)
         )
 
-        interviews = Interview.objects.filter(
-            scheduled_time__range=(start_dt, end_dt)
-        ).select_related("job__company", "interviewer").order_by(
-            "scheduled_time"
+        interviews = (
+            Interview.objects.filter(scheduled_time__range=(start_dt, end_dt))
+            .select_related("job__company", "interviewer")
+            .order_by("scheduled_time")
         )
 
         if query:
@@ -253,7 +253,7 @@ class JobDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context["interviews"] = self.object.interviews.select_related(
             "interviewer"
-        ).order_by("-scheduled_time")
+        ).order_by("scheduled_time")
         context["form"] = InterviewForm()
         context["status_choices"] = Job.Status.choices
         return context

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("jobs", "0016_interview_meeting_link"),
     ]
@@ -26,14 +25,20 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        help_text="Name of the resume (e.g., 'Software Engineer Resume')",
+                        help_text=(
+                            "Name of the resume (e.g., "
+                            "'Software Engineer Resume')"
+                        ),
                         max_length=100,
                     ),
                 ),
                 (
                     "raw_text",
                     models.TextField(
-                        help_text="The extracted plain text used for LLM context processing."
+                        help_text=(
+                            "The extracted plain text used "
+                            "for LLM context processing."
+                        )
                     ),
                 ),
                 (
@@ -49,7 +54,10 @@ class Migration(migrations.Migration):
                     "is_active",
                     models.BooleanField(
                         default=True,
-                        help_text="Designates if this is the primary resume for default match comparisons.",
+                        help_text=(
+                            "Designates if this is the primary resume "
+                            "for default match comparisons."
+                        ),
                     ),
                 ),
                 (
