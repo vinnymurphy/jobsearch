@@ -47,7 +47,7 @@
         <p>{{ job.company.description }}</p>
         <hr>
         <h3>Scheduled Interviews</h3>
-        {% for interview in job.interviews.all %}
+        {% for interview in interviews %}
             <div class="interview-card">
                 <p>
                     <strong>Date:</strong> {{ interview.scheduled_time|date:"F j, Y @ P" }}

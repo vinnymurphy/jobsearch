@@ -253,7 +253,7 @@ class JobDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context["interviews"] = self.object.interviews.select_related(
             "interviewer"
-        ).order_by("-scheduled_time")
+        ).order_by("scheduled_time")
         context["form"] = InterviewForm()
         context["status_choices"] = Job.Status.choices
         return context

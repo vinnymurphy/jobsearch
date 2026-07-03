@@ -124,6 +124,30 @@ class JobDetailStatusTests(TestCase):
         self.assertContains(response, "<strong>Great fit</strong>", html=True)
         self.assertContains(response, "<li>Follow up</li>", html=True)
 
+    def test_interviews_render_earliest_to_latest(self):
+        later = timezone.now() + timezone.timedelta(days=2)
+        earlier = timezone.now() + timezone.timedelta(days=1)
+        Interview.objects.create(
+            job=self.job,
+            scheduled_time=later,
+            feedback="Second interview",
+        )
+        Interview.objects.create(
+            job=self.job,
+            scheduled_time=earlier,
+            feedback="First interview",
+        )
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "First interview")
+        self.assertContains(response, "Second interview")
+        self.assertLess(
+            response.content.index(b"First interview"),
+            response.content.index(b"Second interview"),
+        )
+
 
 class InterviewDetailStatusTests(TestCase):
     def setUp(self):
