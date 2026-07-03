@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load markdown_tags %}
 {% block content %}
     <style>
     .company-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
@@ -46,7 +47,7 @@
         <p>{{ job.company.description }}</p>
         <hr>
         <h3>Scheduled Interviews</h3>
-        {% for interview in job.interviews.all %}
+        {% for interview in interviews %}
             <div class="interview-card">
                 <p>
                     <strong>Date:</strong> {{ interview.scheduled_time|date:"F j, Y @ P" }}
@@ -56,9 +57,10 @@
                     {% if interview.interviewer.email %}({{ interview.interviewer.email }}){% endif %}
                 </p>
                 {% if interview.feedback %}
-                    <p>
-                        <strong>Notes:</strong> {{ interview.feedback }}
-                    </p>
+                    <div>
+                        <strong>Notes:</strong>
+                        <div class="generic-markdown-content">{{ interview.feedback|render_markdown }}</div>
+                    </div>
                 {% endif %}
             </div>
         {% empty %}
