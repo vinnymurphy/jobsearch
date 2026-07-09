@@ -17,7 +17,26 @@
         <div class="company-header">
             <h1>{{ job.title }}</h1>
             <p>
-                <strong>Company:</strong> <a href="{{ job.company.url }}">{{ job.company.name }}</a>
+                <strong>Company:</strong>
+                {% if job.company.website %}
+                    <a href="{{ job.company.website }}" target="_blank" rel="noopener">{{ job.company.name }}</a>
+                {% else %}
+                    {{ job.company.name }}
+                {% endif %}
+            </p>
+            <p>
+                <strong>Applied:</strong> {{ job.applied_date|date:"F j, Y" }}
+            </p>
+            <p>
+                <strong>Reporting Period:</strong> {{ report_start|date:"F j, Y" }} to {{ report_end|date:"F j, Y" }}
+            </p>
+            <p>
+                <strong>Job Posting:</strong>
+                {% if job.application_link %}
+                    <a href="{{ job.application_link }}" target="_blank" rel="noopener">Open posting</a>
+                {% else %}
+                    <span class="text-muted">Not saved</span>
+                {% endif %}
             </p>
             <p>
                 <strong>Industry:</strong>
