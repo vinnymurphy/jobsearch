@@ -70,15 +70,18 @@ class MasterCalendar(calendar.HTMLCalendar):
 
         events_html = []
 
-        # Map statuses to Bootstrap classes
         status_map = {
-            "rejected": "bg-danger-subtle text-danger border-danger",
-            "interviewing": "bg-success-subtle text-success border-success",
-            "closed": "bg-dark-subtle text-dark border-dark",
+            "draft": "status-draft",
+            "open": "status-open",
+            "applied": "status-open",
+            "interviewing": "status-interviewing",
+            "negotiating": "status-negotiating",
+            "rejected": "status-closed",
+            "closed": "status-closed",
         }
 
         for job in day_jobs:
-            status_class = status_map.get(job.status, "bg-secondary")
+            status_class = status_map.get(job.status, "status-open")
             name = (
                 self._highlight(job.company.name)
                 if job.company
@@ -88,11 +91,12 @@ class MasterCalendar(calendar.HTMLCalendar):
             url = job.get_absolute_url()
 
             events_html.append(
-                f'<div class="job-entry {status_class} '
-                'p-1 mb-1 small rounded">'
-                f'<li class="calendar-event"><a href="{url}" target="_blank">'
-                f"{name}</a>: {title}</li>"
-                "</div>"
+                f'<li class="calendar-event job-entry {status_class}">'
+                f'<a href="{url}" class="calendar-event-link">'
+                '<span class="event-kind">Job</span>'
+                f'<span class="event-company">{name}</span>'
+                f'<span class="event-title">{title}</span>'
+                "</a></li>"
             )
 
         for interview in day_interviews:
@@ -108,16 +112,18 @@ class MasterCalendar(calendar.HTMLCalendar):
                 else "Unknown"
             )
             events_html.append(
-                f'<li class="calendar-event bg-interview p-1 '
-                'mb-1 small rounded">'
-                f'<span class="fw-semibold">{scheduled_time}</span> '
-                f'<a href="{url}">{display_text}</a> ({title})</li>'
+                '<li class="calendar-event interview-entry status-interview">'
+                f'<a href="{url}" class="calendar-event-link">'
+                f'<span class="event-kind">{scheduled_time}</span>'
+                f'<span class="event-company">{display_text}</span>'
+                f'<span class="event-title">{title}</span>'
+                "</a></li>"
             )
 
         content = "".join(events_html)
         return (
             f'<td><span class="date">{day}</span>'
-            f'<ul class="list-unstyled">{content}</ul></td>'
+            f'<ul class="calendar-events">{content}</ul></td>'
         )
 
     def formatweek(self, theweek, jobs, interviews):

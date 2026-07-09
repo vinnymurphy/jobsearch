@@ -1,7 +1,8 @@
 from .models import Company, Industry, Interview, Job
 from .utils import get_unemployment_week
 
-from datetime import date
+from datetime import date, datetime
+from unittest.mock import patch
 
 import factory
 from django.test import Client, TestCase
@@ -70,18 +71,45 @@ class JobPerformanceTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
 
+    def test_calendar_uses_event_pill_markup(self):
+        job = Job.objects.create(
+            title="Global Solutions Architect",
+            company=self.company,
+            applied_date=date(2026, 3, 9),
+            status=Job.Status.OPEN,
+        )
+        url = reverse("calendar") + "?year=2026&month=3"
+
+        response = self.client.get(url)
+
+        self.assertContains(response, '<ul class="calendar-events">')
+        self.assertContains(
+            response,
+            (
+                '<li class="calendar-event job-entry status-open">'
+                f'<a href="{job.get_absolute_url()}" '
+                'class="calendar-event-link">'
+            ),
+        )
+        self.assertNotContains(response, '<ul class="list-unstyled">')
+        self.assertNotContains(response, '<div class="job-entry')
+
 
 class JobDetailStatusTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.industry = Industry.objects.create(name="Software")
         self.company = Company.objects.create(
-            name="Test Corp", industry=self.industry
+            name="Test Corp",
+            industry=self.industry,
+            website="https://example.com",
         )
         self.job = Job.objects.create(
             title="Software Engineer",
             company=self.company,
             status=Job.Status.OPEN,
+            applied_date=date(2026, 3, 25),
+            application_link="https://example.com/jobs/software-engineer",
         )
 
     def test_detail_shows_company_industry(self):
@@ -90,6 +118,25 @@ class JobDetailStatusTests(TestCase):
         response = self.client.get(url)
 
         self.assertContains(response, "Software")
+
+    def test_detail_shows_company_and_job_links(self):
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, 'href="https://example.com"')
+        self.assertContains(
+            response, 'href="https://example.com/jobs/software-engineer"'
+        )
+
+    def test_detail_shows_reporting_period(self):
+        url = reverse("job_detail", kwargs={"slug": self.job.slug})
+
+        response = self.client.get(url)
+
+        self.assertContains(response, "Reporting Period:")
+        self.assertContains(response, "March 22, 2026")
+        self.assertContains(response, "March 28, 2026")
 
     def test_can_change_job_status_from_detail(self):
         url = reverse("job_detail", kwargs={"slug": self.job.slug})
@@ -215,6 +262,38 @@ class UnemploymentReportingTests(TestCase):
         surrounding Sunday-to-Saturday window.
         """
         self.sunday_to_saturday_span(25)
+
+    def test_report_template_shows_reporting_period(self):
+        company = Company.objects.create(name="Test Corp")
+        Job.objects.create(
+            title="Software Engineer",
+            company=company,
+            applied_date=date(2026, 3, 25),
+        )
+        url = reverse("unemployment_report")
+        now = timezone.make_aware(datetime(2026, 3, 29, 9, 0))
+
+        with patch("jobs.unemployment.timezone.now", return_value=now):
+            response = self.client.get(url)
+
+        self.assertContains(response, "Reporting Period:")
+        self.assertContains(response, "March 22, 2026")
+        self.assertContains(response, "March 29, 2026")
+
+    def test_report_links_applications_to_job_detail(self):
+        company = Company.objects.create(name="Test Corp")
+        job = Job.objects.create(
+            title="Software Engineer",
+            company=company,
+            applied_date=date(2026, 3, 25),
+        )
+        url = reverse("unemployment_report")
+        now = timezone.make_aware(datetime(2026, 3, 29, 9, 0))
+
+        with patch("jobs.unemployment.timezone.now", return_value=now):
+            response = self.client.get(url)
+
+        self.assertContains(response, f'href="{job.get_absolute_url()}"')
 
     def sunday_to_saturday_span(self, arg0):
         """Helper that asserts an application date resolves to the

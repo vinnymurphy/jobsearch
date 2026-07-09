@@ -251,10 +251,17 @@ class JobDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        report_start, report_end = get_unemployment_week(
+            self.object.applied_date
+        )
         context["interviews"] = self.object.interviews.select_related(
             "interviewer"
         ).order_by("scheduled_time")
-        context["form"] = InterviewForm()
+        context["interview_form"] = context.get(
+            "interview_form", InterviewForm()
+        )
+        context["report_start"] = report_start
+        context["report_end"] = report_end
         context["status_choices"] = Job.Status.choices
         return context
 
