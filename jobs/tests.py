@@ -2,9 +2,11 @@ from .models import Company, Industry, Interview, Job
 from .utils import get_unemployment_week
 
 from datetime import date, datetime
+from io import StringIO
 from unittest.mock import patch
 
 import factory
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -304,3 +306,32 @@ class UnemploymentReportingTests(TestCase):
         start, end = get_unemployment_week(applied_date)
         self.assertEqual(start, date(2026, 3, 22))
         self.assertEqual(end, date(2026, 3, 28))
+
+
+class UpdateJobStatusesCommandTests(TestCase):
+    def test_company_filter_only_selects_matching_company(self):
+        target_company = Company.objects.create(name="Acme Corp")
+        other_company = Company.objects.create(name="Other Corp")
+        target_job = Job.objects.create(
+            title="Target role", company=target_company, status=Job.Status.OPEN
+        )
+        other_job = Job.objects.create(
+            title="Other role", company=other_company, status=Job.Status.OPEN
+        )
+        output = StringIO()
+
+        call_command(
+            "update_job_statuses",
+            (timezone.localdate() + timezone.timedelta(days=1)).isoformat(),
+            "--company",
+            "acme corp",
+            "--status",
+            Job.Status.REJECTED,
+            stdout=output,
+        )
+
+        target_job.refresh_from_db()
+        other_job.refresh_from_db()
+        self.assertEqual(target_job.status, Job.Status.REJECTED)
+        self.assertEqual(other_job.status, Job.Status.OPEN)
+        self.assertIn("Successfully updated 1 job(s)", output.getvalue())
