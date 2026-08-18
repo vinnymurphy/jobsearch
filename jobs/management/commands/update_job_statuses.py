@@ -1,6 +1,8 @@
-from datetime import datetime
-from django.core.management.base import BaseCommand, CommandError
 from jobs.models import Job
+
+from datetime import datetime
+
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
@@ -11,7 +13,10 @@ class Command(BaseCommand):
         parser.add_argument(
             "cutoff_date",
             type=str,
-            help="Cutoff date in YYYY-MM-DD format (jobs BEFORE this date will be updated).",
+            help=(
+                "Cutoff date in YYYY-MM-DD format "
+                "(jobs BEFORE this date will be updated)."
+            ),
         )
 
         # Optional argument: Status value to apply (defaults to REJECTED)
@@ -31,11 +36,11 @@ class Command(BaseCommand):
             help="Which model field to filter against (default: created_at).",
         )
 
-        # Optional company filter, matched case-insensitively against the name.
+        # Optional company filter, matched case-insensitively against the
+        # company name.
         parser.add_argument(
             "--company",
             type=str,
-            help="Only update jobs for this company name (case-insensitive exact match).",
         )
 
         # Flag to preview changes without modifying the database
@@ -55,8 +60,10 @@ class Command(BaseCommand):
         # Parse date input
         try:
             cutoff_dt = datetime.strptime(raw_date, "%Y-%m-%d").date()
-        except ValueError:
-            raise CommandError("Invalid date format. Please use YYYY-MM-DD.")
+        except ValueError as e:
+            raise CommandError(
+                "Invalid date format. Please use YYYY-MM-DD."
+            ) from e
 
         # Construct dynamic lookup query (e.g., created_at__date__lt)
         filter_kwargs = {f"{date_field}__date__lt": cutoff_dt}
@@ -83,11 +90,14 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(
                     f"[DRY RUN] Found {match_count} job(s) before {cutoff_dt}"
-                    f"{company_description} to update to status '{new_status}'."
+                    f"{company_description} to update to "
+                    f"status '{new_status}'."
                 )
             )
             for job in queryset[:5]:
-                self.stdout.write(f"  - [{job.id}] {job.title} at {job.company.name}")
+                self.stdout.write(
+                    f"  - [{job.id}] {job.title} at {job.company.name}"
+                )
             if match_count > 5:
                 self.stdout.write(f"  ... and {match_count - 5} more.")
             return
@@ -97,6 +107,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Successfully updated {updated_count} job(s) to status '{new_status}'."
+                f"Successfully updated {updated_count} "
+                f"job(s) to status '{new_status}'."
             )
         )

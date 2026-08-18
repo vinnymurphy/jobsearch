@@ -313,7 +313,9 @@ class UpdateJobStatusesCommandTests(TestCase):
         target_company = Company.objects.create(name="Acme Corp")
         other_company = Company.objects.create(name="Other Corp")
         target_job = Job.objects.create(
-            title="Target role", company=target_company, status=Job.Status.OPEN
+            title="Target role",
+            company=target_company,
+            status=Job.Status.OPEN,
         )
         other_job = Job.objects.create(
             title="Other role", company=other_company, status=Job.Status.OPEN
