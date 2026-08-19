@@ -1,0 +1,26 @@
+{applicant_name}
+{applicant_location}
+{applicant_email}
+
+{date_today}
+
+Hiring Team
+{company_name}
+
+Re: Application for {job_title}
+
+Dear Hiring Manager,
+
+I am writing to express my strong interest in the {job_title} position at {company_name}. With my background in software infrastructure, build systems, and distributed platforms, I have built my career on turning complex operational challenges into dependable, scalable solutions. {company_name}’s work in this domain aligns directly with my core experience.
+
+Throughout my career, I have focused heavily on eliminating operational toil and enforcing system reliability through software engineering. My core strength lies in leveraging Python and Bash to build custom internal tooling, automate complex release workflows, and streamline fleet management.
+
+Central to my work in platform reliability is building and scaling enterprise CI/CD infrastructure. I have extensive hands-on experience architecting Jenkins pipelines that integrate automated testing, security controls, artifact management, and controlled deployment strategies.
+
+Beyond build and pipeline engineering, I bring a methodical approach to system observability and incident diagnostics. I regularly collaborate with software and platform engineering teams to investigate production anomalies, isolate root causes in complex Linux systems, and implement long-term software fixes.
+
+I would welcome the opportunity to bring my automation, pipeline, and platform engineering expertise to your team at {company_name}. Thank you for your time and consideration.
+
+Sincerely,
+
+{applicant_name}
