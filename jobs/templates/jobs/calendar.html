@@ -1,270 +1,311 @@
 {% extends "base.html" %}
-{% block breadcrumbs %}<li class="breadcrumb-item active" aria-current="page">Job Calendar</li>{% endblock %}
+{% block breadcrumbs %}
+  <li class="breadcrumb-item active"
+      aria-current="page">Job Calendar</li>
+{% endblock %}
 {% block content %}
-    <style>
-        .calendar-page {
-            display: grid;
-            gap: 1.25rem;
-        }
-        .calendar-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .calendar-toolbar h2 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #1f2937;
-        }
-        .calendar-nav {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .calendar-shell {
-            overflow-x: auto;
-            border: 1px solid #d8dee8;
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
-        }
-        .calendar {
-            width: 100%;
-            min-width: 840px;
-            margin: 0;
-            border-collapse: separate;
-            border-spacing: 0;
-            table-layout: fixed;
-        }
-        .calendar th {
-            padding: 0.75rem;
-            background: #f3f6fa;
-            text-align: center;
-            color: #4b5563;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            border-color: #d8dee8;
-        }
-        .calendar .month {
-            background: #243447;
-            color: #fff;
-            font-size: 1rem;
-            letter-spacing: 0;
-            text-transform: none;
-            padding: 0.9rem;
-        }
-        .calendar td {
-            width: 14.285%;
-            height: 150px;
-            border-color: #e2e8f0;
-            vertical-align: top;
-            padding: 0.65rem;
-            background: #fff;
-        }
-        .calendar td.noday {
-            background: repeating-linear-gradient(
-                -45deg,
-                #f8fafc,
-                #f8fafc 8px,
-                #f1f5f9 8px,
-                #f1f5f9 16px
-            );
-        }
-        .date {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 1.85rem;
-            height: 1.85rem;
-            margin-bottom: 0.45rem;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #334155;
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
-        }
-        .calendar-events {
-            display: grid;
-            gap: 0.4rem;
-            padding: 0;
-            margin: 0;
-            list-style: none;
-        }
-        .calendar-event {
-            border: 1px solid transparent;
-            border-left-width: 4px;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
-        }
-        .calendar-event:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
-        }
-        .calendar-event-link {
-            display: block;
-            padding: 0.45rem 0.55rem;
-            color: inherit;
-            text-decoration: none;
-            line-height: 1.25;
-        }
-        .event-kind {
-            display: block;
-            margin-bottom: 0.15rem;
-            font-size: 0.68rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: rgba(15, 23, 42, 0.62);
-        }
-        .event-company {
-            display: block;
-            font-size: 0.84rem;
-            font-weight: 700;
-            color: #111827;
-        }
-        .event-title {
-            display: block;
-            margin-top: 0.05rem;
-            font-size: 0.76rem;
-            color: #475569;
-        }
-        .status-open {
-            background: #eef6ff;
-            border-color: #9ac5f4;
-        }
-        .status-draft {
-            background: #f5f5f4;
-            border-color: #a8a29e;
-        }
-        .status-interview,
-        .status-interviewing {
-            background: #ecfdf3;
-            border-color: #52b788;
-        }
-        .status-negotiating {
-            background: #fff7ed;
-            border-color: #fb923c;
-        }
-        .status-closed {
-            background: #fff1f2;
-            border-color: #fb7185;
-        }
-        .calendar-legend {
-            display: flex;
-            justify-content: flex-start;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            padding: 0.85rem 1rem;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px solid #d8dee8;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.86rem;
-            font-weight: 600;
-            color: #475569;
-        }
-        .box {
-            width: 14px;
-            height: 14px;
-            display: inline-block;
-            margin-right: 0.45rem;
-            border-radius: 4px;
-            border: 1px solid rgba(15,23,42,0.16);
-        }
-        .bg-open {
-            background: #eef6ff;
-            border-left: 4px solid #9ac5f4;
-        }
-        .bg-draft {
-            background: #f5f5f4;
-            border-left: 4px solid #a8a29e;
-        }
-        .bg-closed {
-            background: #fff1f2;
-            border-left: 4px solid #fb7185;
-        }
-        .bg-interview {
-            background: #ecfdf3;
-            border-left: 4px solid #52b788;
-        }
-        .calendar-actions {
-            display: flex;
-            justify-content: flex-end;
-        }
-        @media print {
-            @page {
-                size: letter landscape;
-                margin: 0.5in;
-            }
-            .btn-print, .calendar-nav { display: none; }
-            .calendar-shell {
-                box-shadow: none;
-                border: 0;
-                overflow: visible;
-            }
-            .calendar {
-                width: 100%;
-                min-width: 0;
-                border-collapse: collapse;
-            }
-            .calendar td {
-                height: 110px;
-                padding: 0.35rem;
-            }
-        }
-        @media (max-width: 768px) {
-            .calendar-toolbar {
-                align-items: stretch;
-            }
-            .calendar-nav,
-            .calendar-nav .btn {
-                width: 100%;
-            }
-        }
-    </style>
-    <div class="calendar-page">
-        <div class="calendar-toolbar">
-            <h2>Job Calendar</h2>
-            <div class="calendar-nav">
-                <a class="btn btn-outline-primary"
-                   href="?year={{ prev_year }}&month={{ prev_month }}">
-                    <i class="bi bi-chevron-left"></i> Previous
-                </a>
-                <a class="btn btn-outline-primary"
-                   href="?year={{ next_year }}&month={{ next_month }}">
-                    Next <i class="bi bi-chevron-right"></i>
-                </a>
-            </div>
-        </div>
-        <div class="calendar-shell">{{ calendar }}</div>
-        <div class="calendar-legend">
-            <div class="legend-item">
-                <span class="box bg-open"></span> Open / Applied
-            </div>
-            <div class="legend-item">
-                <span class="box bg-draft"></span> Draft / Not Started
-            </div>
-            <div class="legend-item">
-                <span class="box bg-interview"></span> Interviewing / Scheduled
-            </div>
-            <div class="legend-item">
-                <span class="box bg-closed"></span> Closed / Rejected
-            </div>
-        </div>
-        <div class="calendar-actions">
-            <a href="{% url 'export_pdf' year=year month=month %}"
-               class="btn btn-outline-secondary btn-sm btn-print">
-                <i class="bi bi-printer"></i> Download PDF Schedule
-            </a>
-        </div>
+  <style>
+      .calendar-page {
+          display: grid;
+          gap: 1.25rem;
+      }
+
+      .calendar-toolbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+      }
+
+      .calendar-toolbar h2 {
+          margin: 0;
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #1f2937;
+      }
+
+      .calendar-nav {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+      }
+
+      .calendar-shell {
+          overflow-x: auto;
+          border: 1px solid #d8dee8;
+          border-radius: 8px;
+          background: #fff;
+          box-shadow: 0 10px 24px rgba(31, 41, 55, 0.08);
+      }
+
+      .calendar {
+          width: 100%;
+          min-width: 840px;
+          margin: 0;
+          border-collapse: separate;
+          border-spacing: 0;
+          table-layout: fixed;
+      }
+
+      .calendar th {
+          padding: 0.75rem;
+          background: #f3f6fa;
+          text-align: center;
+          color: #4b5563;
+          font-size: 0.78rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          border-color: #d8dee8;
+      }
+
+      .calendar .month {
+          background: #243447;
+          color: #fff;
+          font-size: 1rem;
+          letter-spacing: 0;
+          text-transform: none;
+          padding: 0.9rem;
+      }
+
+      .calendar td {
+          width: 14.285%;
+          height: 150px;
+          border-color: #e2e8f0;
+          vertical-align: top;
+          padding: 0.65rem;
+          background: #fff;
+      }
+
+      .calendar td.noday {
+          background: repeating-linear-gradient(-45deg,
+                  #f8fafc,
+                  #f8fafc 8px,
+                  #f1f5f9 8px,
+                  #f1f5f9 16px);
+      }
+
+      .date {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.85rem;
+          height: 1.85rem;
+          margin-bottom: 0.45rem;
+          border-radius: 999px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          color: #334155;
+          background: #f8fafc;
+          border: 1px solid #e5e7eb;
+      }
+
+      .calendar-events {
+          display: grid;
+          gap: 0.4rem;
+          padding: 0;
+          margin: 0;
+          list-style: none;
+      }
+
+      .calendar-event {
+          border: 1px solid transparent;
+          border-left-width: 4px;
+          border-radius: 8px;
+          overflow: hidden;
+          transition: transform 0.12s ease-in-out, box-shadow 0.12s ease-in-out;
+      }
+
+      .calendar-event:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+      }
+
+      .calendar-event-link {
+          display: block;
+          padding: 0.45rem 0.55rem;
+          color: inherit;
+          text-decoration: none;
+          line-height: 1.25;
+      }
+
+      .event-kind {
+          display: block;
+          margin-bottom: 0.15rem;
+          font-size: 0.68rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          color: rgba(15, 23, 42, 0.62);
+      }
+
+      .event-company {
+          display: block;
+          font-size: 0.84rem;
+          font-weight: 700;
+          color: #111827;
+      }
+
+      .event-title {
+          display: block;
+          margin-top: 0.05rem;
+          font-size: 0.76rem;
+          color: #475569;
+      }
+
+      .status-open {
+          background: #eef6ff;
+          border-color: #9ac5f4;
+      }
+
+      .status-draft {
+          background: #f5f5f4;
+          border-color: #a8a29e;
+      }
+
+      .status-interview,
+      .status-interviewing {
+          background: #ecfdf3;
+          border-color: #52b788;
+      }
+
+      .status-negotiating {
+          background: #fff7ed;
+          border-color: #fb923c;
+      }
+
+      .status-closed {
+          background: #fff1f2;
+          border-color: #fb7185;
+      }
+
+      .calendar-legend {
+          display: flex;
+          justify-content: flex-start;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+          padding: 0.85rem 1rem;
+          background: #f8fafc;
+          border-radius: 8px;
+          border: 1px solid #d8dee8;
+      }
+
+      .legend-item {
+          display: flex;
+          align-items: center;
+          font-size: 0.86rem;
+          font-weight: 600;
+          color: #475569;
+      }
+
+      .box {
+          width: 14px;
+          height: 14px;
+          display: inline-block;
+          margin-right: 0.45rem;
+          border-radius: 4px;
+          border: 1px solid rgba(15, 23, 42, 0.16);
+      }
+
+      .bg-open {
+          background: #eef6ff;
+          border-left: 4px solid #9ac5f4;
+      }
+
+      .bg-draft {
+          background: #f5f5f4;
+          border-left: 4px solid #a8a29e;
+      }
+
+      .bg-closed {
+          background: #fff1f2;
+          border-left: 4px solid #fb7185;
+      }
+
+      .bg-interview {
+          background: #ecfdf3;
+          border-left: 4px solid #52b788;
+      }
+
+      .calendar-actions {
+          display: flex;
+          justify-content: flex-end;
+      }
+
+      @media print {
+          @page {
+              size: letter landscape;
+              margin: 0.5in;
+          }
+
+          .btn-print,
+          .calendar-nav {
+              display: none;
+          }
+
+          .calendar-shell {
+              box-shadow: none;
+              border: 0;
+              overflow: visible;
+          }
+
+          .calendar {
+              width: 100%;
+              min-width: 0;
+              border-collapse: collapse;
+          }
+
+          .calendar td {
+              height: 110px;
+              padding: 0.35rem;
+          }
+      }
+
+      @media (max-width: 768px) {
+          .calendar-toolbar {
+              align-items: stretch;
+          }
+
+          .calendar-nav,
+          .calendar-nav .btn {
+              width: 100%;
+          }
+      }
+  </style>
+  <div class="calendar-page">
+    <div class="calendar-toolbar">
+      <h2>Job Calendar</h2>
+      <div class="calendar-nav">
+        <a class="btn btn-outline-primary"
+           href="?year={{ prev_year }}&month={{ prev_month }}">
+          <i class="bi bi-chevron-left"></i> Previous
+        </a>
+        <a class="btn btn-outline-primary"
+           href="?year={{ next_year }}&month={{ next_month }}">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </div>
     </div>
+    <div class="calendar-shell">{{ calendar }}</div>
+    <div class="calendar-legend">
+      <div class="legend-item">
+        <span class="box bg-open"></span> Open / Applied
+      </div>
+      <div class="legend-item">
+        <span class="box bg-draft"></span> Draft / Not Started
+      </div>
+      <div class="legend-item">
+        <span class="box bg-interview"></span> Interviewing / Scheduled
+      </div>
+      <div class="legend-item">
+        <span class="box bg-closed"></span> Closed / Rejected
+      </div>
+    </div>
+    <div class="calendar-actions">
+      <a href="{% url 'export_pdf' year=year month=month %}"
+         class="btn btn-outline-secondary btn-sm btn-print">
+        <i class="bi bi-printer"></i> Download PDF Schedule
+      </a>
+    </div>
+  </div>
 {% endblock %}

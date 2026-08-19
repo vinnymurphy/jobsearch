@@ -47,6 +47,38 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": (
+                "[%(asctime)s] %(levelname)s "
+                "[%(name)s:%(lineno)s] %(message)s"
+            ),
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "file_commands": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(LOGS_DIR, "management_commands.log"),
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "jobs.commands": {
+            "handlers": ["file_commands"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}
 # Application definition
 
 INSTALLED_APPS = [
