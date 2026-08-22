@@ -17,24 +17,22 @@
     </div>
   </div>
   <canvas id="jobChart" width="400" height="200"></canvas>
+  {{ labels|json_script:"job-chart-labels" }}
+  {{ counts|json_script:"job-chart-counts" }}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
       const ctx = document.getElementById('jobChart').getContext('2d');
+      const labelsElement = document.getElementById('job-chart-labels');
+      const countsElement = document.getElementById('job-chart-counts');
+      const labels = JSON.parse(labelsElement.textContent);
+      const counts = JSON.parse(countsElement.textContent);
       const jobChart = new Chart(ctx, {
           type: 'bar',
           data: {
-              labels: {
-                  {
-                      labels | safe
-                  }
-              },
+              labels: labels,
               datasets: [{
                   label: 'Applications per Company',
-                  data: {
-                      {
-                          counts | safe
-                      }
-                  },
+                  data: counts,
                   backgroundColor: 'rgba(54, 162, 235, 0.5)',
                   borderColor: 'rgba(54, 162, 235, 1)',
                   borderWidth: 1

@@ -73,6 +73,22 @@ class JobPerformanceTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
 
+    def test_dashboard_renders_chart_data_as_json(self):
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertContains(
+            response,
+            '<script id="job-chart-labels" type="application/json">'
+            '["Cisco"]</script>',
+        )
+        self.assertContains(
+            response,
+            '<script id="job-chart-counts" type="application/json">'
+            "[20]</script>",
+        )
+        self.assertContains(response, "labels: labels,")
+        self.assertContains(response, "data: counts,")
+
     def test_calendar_uses_event_pill_markup(self):
         job = Job.objects.create(
             title="Global Solutions Architect",
