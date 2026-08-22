@@ -2,60 +2,65 @@
 {% load markdown_tags %}
 <!-- 1. LOAD YOUR CUSTOM TAGS HERE -->
 {% block content %}
-    <div class="container mt-4">
-        <h1>Interview with {{ interview.job.company }}</h1>
-        <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
-            <form method="post"
-                  action="{% url 'interview_detail' interview.pk %}"
-                  class="d-flex align-items-center gap-2 flex-wrap m-0">
-                {% csrf_token %}
-                <label for="transition-status" class="form-label fw-bold mb-0">Job Status:</label>
-                <select id="transition-status"
-                        name="transition_status"
-                        class="form-select form-select-sm"
-                        style="width: auto">
-                    {% for value, label in status_choices %}
-                        <option value="{{ value }}"
-                                {% if interview.job.status == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary">Update</button>
-            </form>
-        </div>
-        <hr>
-        <!-- DISPLAYING THE RENDERED MARKDOWN -->
-        {% if interview.feedback %}
-            <div class="card mb-4 border-info">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Interview Debrief & Insights</h5>
-                </div>
-                <div class="card-body generic-markdown-content">
-                    {{ interview.feedback|render_markdown }} <!-- 2. USE THE FILTER HERE -->
-                </div>
-            </div>
-        {% endif %}
-        <!-- YOUR EXISTING FORM -->
-        <div class="card mt-4">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Edit Interview Notes (Markdown Supported)</h5>
-                <a href="https://www.markdownguide.org/basic-syntax/"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   class="btn btn-sm btn-outline-secondary text-decoration-none">Markdown Guide ↗</a>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{% url 'interview_detail' interview.pk %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <textarea name="feedback"
-                                  class="form-control"
-                                  rows="6"
-                                  placeholder="Use ### for headers, * for lists, **bold** for emphasis...">{{ interview.feedback }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success">Save Notes</button>
-                </form>
-            </div>
-        </div>
-        ...
+  <div class="container mt-4">
+    <h1>Interview with {{ interview.job.company }}</h1>
+    <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+      <form method="post"
+            action="{% url 'interview_detail' interview.pk %}"
+            class="d-flex align-items-center gap-2 flex-wrap m-0">
+        {% csrf_token %}
+        <label for="transition-status"
+               class="form-label fw-bold mb-0">Job Status:</label>
+        <select id="transition-status"
+                name="transition_status"
+                class="form-select form-select-sm"
+                style="width: auto">
+          {% for value, label in status_choices %}
+            <option value="{{ value }}"
+                    {% if interview.job.status == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        <button type="submit"
+                class="btn btn-sm btn-primary">Update</button>
+      </form>
     </div>
+    <hr>
+    <!-- DISPLAYING THE RENDERED MARKDOWN -->
+    {% if interview.feedback %}
+      <div class="card mb-4 border-info">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Interview Debrief & Insights</h5>
+        </div>
+        <div class="card-body generic-markdown-content">
+          {{ interview.feedback|render_markdown }} <!-- 2. USE THE FILTER HERE -->
+        </div>
+      </div>
+    {% endif %}
+    <!-- YOUR EXISTING FORM -->
+    <div class="card mt-4">
+      <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Edit Interview Notes (Markdown Supported)</h5>
+        <a href="https://www.markdownguide.org/basic-syntax/"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="btn btn-sm btn-outline-secondary text-decoration-none">Markdown Guide ↗</a>
+      </div>
+      <div class="card-body">
+        <form method="POST"
+              action="{% url 'interview_detail' interview.pk %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <textarea name="feedback"
+                      class="form-control"
+                      rows="6"
+                      placeholder="Use ### for headers, * for lists, **bold** for emphasis...">{{ interview.feedback }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-success">Save Notes</button>
+        </form>
+      </div>
+    </div>
+    ...
+  </div>
 {% endblock %}

@@ -1,3 +1,7 @@
+# Ignore local user profile & custom templates
+jobs/templates/jobs/cover_letter_custom.txt
+user_profile.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
