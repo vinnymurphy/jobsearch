@@ -1,36 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="kpi-container"
-         style="display: flex;
-                gap: 20px;
-                margin-bottom: 20px">
-        <div class="kpi-card"
-             style="padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                    background: #e7f3ff">
-            <h3>Velocity</h3>
-            <p style="font-size: 2rem; font-weight: bold; margin: 0;">{{ recent_velocity }}</p>
-            <small>Apps sent in last 7 days</small>
-        </div>
+  <div class="kpi-container"
+       style="display: flex;
+              gap: 20px;
+              margin-bottom: 20px">
+    <div class="kpi-card"
+         style="padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background: #e7f3ff">
+      <h3>Velocity</h3>
+      <p style="font-size: 2rem;
+                font-weight: bold;
+                margin: 0">{{ recent_velocity }}</p>
+      <small>Apps sent in last 7 days</small>
     </div>
-    <canvas id="jobChart" width="400" height="200"></canvas>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-    const ctx = document.getElementById('jobChart').getContext('2d');
-    const jobChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ labels|safe }},
-            datasets: [{
-                label: 'Applications per Company',
-                data: {{ counts|safe }},
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: { scales: { y: { beginAtZero: true } } }
-    });
-    </script>
+  </div>
+  <canvas id="jobChart" width="400" height="200"></canvas>
+  {{ labels|json_script:"job-chart-labels" }}
+  {{ counts|json_script:"job-chart-counts" }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+      const ctx = document.getElementById('jobChart').getContext('2d');
+      const labelsElement = document.getElementById('job-chart-labels');
+      const countsElement = document.getElementById('job-chart-counts');
+      const labels = JSON.parse(labelsElement.textContent);
+      const counts = JSON.parse(countsElement.textContent);
+      const jobChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Applications per Company',
+                  data: counts,
+                  backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+  </script>
 {% endblock %}

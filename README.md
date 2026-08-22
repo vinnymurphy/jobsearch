@@ -1,11 +1,13 @@
 # JobSearch
 
-A streamlined Django application to track the lifecycle of your job search, from initial application to final interview.
+A streamlined Django application to track the lifecycle of your job search,
+from initial application to final interview.
 
 ## 🚀 Getting Started
 
 ### Prerequisites (Fedora)
-To support **PDF Exporting** via WeasyPrint, you must install the following system dependencies:
+To support **PDF Exporting** via WeasyPrint, install the following system
+dependencies:
 
 ```bash
 sudo dnf install pango-devel cairo-devel gdk-pixbuf2-devel libffi-devel
@@ -34,13 +36,18 @@ make run
 
 ## 📊 Data Model
 
-The application uses a relational structure to track the progression from lead to interview.
+The application uses a relational structure to track the progression from lead
+to interview.
 
 ### Relational Overview
-* **Industry** ↔ **Company**: One-to-Many (Companies are categorized by industry).
-* **Company** ↔ **Job**: One-to-Many (A company can have multiple roles you are tracking).
-* **Job** ↔ **Interview**: One-to-Many (A single job application can have multiple interview rounds).
-* **Interviewer** ↔ **Interview**: Many-to-One (Tracking who you spoke with during each round).
+* **Industry** ↔ **Company**: One-to-Many (Companies are categorized by
+  industry).
+* **Company** ↔ **Job**: One-to-Many (A company can have multiple roles you
+  are tracking).
+* **Job** ↔ **Interview**: One-to-Many (A single job application can have
+  multiple interview rounds).
+* **Interviewer** ↔ **Interview**: Many-to-One (Tracking who you spoke with
+  during each round).
 
 ### Schema Diagram
 The relationship flow follows this logic:
@@ -77,10 +84,15 @@ graph TD
 - **Language:** Python 3.12 / 3.14 (Tested for future-compatibility)
 - **Framework:** Django 5.x / 6.x
 - **Database:** SQLite (Local-first for privacy/speed)
-- **Tooling:** `django-extensions`, `weasyprint` (for PDF generation), `Select2`
+- **Tooling:** `django-extensions`, `weasyprint` (for PDF generation),
+  `Select2`
 
 ## 🏗 Design Philosophy
-- **Local-First / Privacy-Centric:** Designed to run on a local Fedora workstation to keep proprietary job search data and interview notes out of the public cloud.
-- **Observability:** Integrated with `django-debug-toolbar` for SQL query optimization and performance monitoring.
-- **RelOps Automation:** Uses a Sunday-to-Saturday logical windowing system to automate government-mandated unemployment reporting, reducing administrative overhead from hours to seconds.
-
+- **Local-First / Privacy-Centric:** Designed to run on a local Fedora
+  workstation to keep proprietary job search data and interview notes out of
+  the public cloud.
+- **Observability:** Integrated with `django-debug-toolbar` for SQL query
+  optimization and performance monitoring.
+- **RelOps Automation:** Uses a Sunday-to-Saturday logical windowing system to
+  automate government-mandated unemployment reporting, reducing administrative
+  overhead from hours to seconds.
