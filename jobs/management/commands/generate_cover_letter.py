@@ -166,8 +166,7 @@ class Command(BaseCommand):
 
     def format_job_bullet_points(self, job):
         """Format custom job bullets or use the default bullet points."""
-        bullets = getattr(job, "key_bullets", [])
-        if bullets:
+        if bullets := getattr(job, "key_bullets", []):
             return "\n".join(f"* {bullet.strip()}" for bullet in bullets)
         return (
             "* Architectural leadership in building resilient CI/CD "
