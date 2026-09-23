@@ -20,7 +20,8 @@
   {{ labels|json_script:"job-chart-labels" }}
   {{ counts|json_script:"job-chart-counts" }}
   {{ company_urls|json_script:"job-chart-company-urls" }}
-  <section class="mt-4" aria-labelledby="company-links-heading">
+  <section class="mt-4"
+           aria-labelledby="company-links-heading">
     <h2 id="company-links-heading" class="h5">Companies</h2>
     <div class="list-group">
       {% for company in companies %}
