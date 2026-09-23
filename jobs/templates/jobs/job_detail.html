@@ -33,12 +33,12 @@
       <h1>{{ job.title }}</h1>
       <p>
         <strong>Company:</strong>
+        <a href="{{ job.company.get_absolute_url }}">{{ job.company.name }}</a>
         {% if job.company.website %}
           <a href="{{ job.company.website }}"
              target="_blank"
-             rel="noopener">{{ job.company.name }}</a>
-        {% else %}
-          {{ job.company.name }}
+             rel="noopener"
+             class="small ms-1">Visit website</a>
         {% endif %}
       </p>
       <p>
