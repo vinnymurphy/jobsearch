@@ -1,5 +1,5 @@
 from .forms import IndustryForm, InterviewerForm, InterviewForm, JobForm
-from .models import Interview, Job
+from .models import Company, Interview, Job
 from .utils import MasterCalendar, get_date, get_unemployment_week
 
 from collections import OrderedDict
@@ -13,7 +13,7 @@ from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import generic
@@ -58,11 +58,11 @@ def chat_view(request):
 def dashboard_view(request):
     # Aggregate job counts by company
     performance_data = (
-        Job.objects.values("company__name")
+        Job.objects.values("company__id", "company__name")
         .annotate(
             total=Count("id"), company_name_lower=Lower("company__name")
         )
-        .order_by("-total")
+        .order_by("company_name_lower")
     )
     seven_days_ago = timezone.now() - timedelta(days=7)
     recent_velocity = Job.objects.filter(
@@ -72,9 +72,39 @@ def dashboard_view(request):
     context = {
         "labels": [item["company__name"] for item in performance_data],
         "counts": [item["total"] for item in performance_data],
+        "company_urls": [
+            reverse("company_detail", kwargs={"pk": item["company__id"]})
+            for item in performance_data
+        ],
+        "companies": [
+            {
+                "name": item["company__name"],
+                "url": reverse(
+                    "company_detail", kwargs={"pk": item["company__id"]}
+                ),
+                "total": item["total"],
+            }
+            for item in performance_data
+        ],
         "recent_velocity": recent_velocity,
     }
     return render(request, "jobs/dashboard.html", context)
+
+
+class CompanyDetailView(generic.DetailView):
+    model = Company
+    template_name = "jobs/company_detail.html"
+    context_object_name = "company"
+
+    def get_queryset(self):
+        return Company.objects.select_related("industry").prefetch_related(
+            "jobs__interviews__interviewer"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["jobs"] = self.object.jobs.all().order_by("-applied_date")
+        return context
 
 
 def export_calendar_pdf(request, year, month):

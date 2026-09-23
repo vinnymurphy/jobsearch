@@ -112,6 +112,9 @@ class Company(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse("company_detail", kwargs={"pk": self.pk})
+
 
 class Interviewer(models.Model):
     name = models.CharField(max_length=255)

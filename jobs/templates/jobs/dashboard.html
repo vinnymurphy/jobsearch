@@ -19,13 +19,31 @@
   <canvas id="jobChart" width="400" height="200"></canvas>
   {{ labels|json_script:"job-chart-labels" }}
   {{ counts|json_script:"job-chart-counts" }}
+  {{ company_urls|json_script:"job-chart-company-urls" }}
+  <section class="mt-4"
+           aria-labelledby="company-links-heading">
+    <h2 id="company-links-heading" class="h5">Companies</h2>
+    <div class="list-group">
+      {% for company in companies %}
+        <a href="{{ company.url }}"
+           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          {{ company.name }}
+          <span class="badge text-bg-primary rounded-pill">{{ company.total }} job{{ company.total|pluralize }}</span>
+        </a>
+      {% empty %}
+        <p class="text-muted">No companies have been added yet.</p>
+      {% endfor %}
+    </div>
+  </section>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
       const ctx = document.getElementById('jobChart').getContext('2d');
       const labelsElement = document.getElementById('job-chart-labels');
       const countsElement = document.getElementById('job-chart-counts');
+      const companyUrlsElement = document.getElementById('job-chart-company-urls');
       const labels = JSON.parse(labelsElement.textContent);
       const counts = JSON.parse(countsElement.textContent);
+      const companyUrls = JSON.parse(companyUrlsElement.textContent);
       const jobChart = new Chart(ctx, {
           type: 'bar',
           data: {
@@ -39,6 +57,14 @@
               }]
           },
           options: {
+              onClick: (_, elements) => {
+                  if (elements.length) {
+                      window.location.href = companyUrls[elements[0].index];
+                  }
+              },
+              onHover: (_, elements) => {
+                  ctx.canvas.style.cursor = elements.length ? 'pointer' : 'default';
+              },
               scales: {
                   y: {
                       beginAtZero: true

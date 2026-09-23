@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block breadcrumbs %}
+  <li class="breadcrumb-item active"
+      aria-current="page">{{ company.name }}</li>
+{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h2 mb-1">{{ company.name }}</h1>
+      {% if company.industry %}
+        <span class="badge text-bg-info">{{ company.industry.name }}</span>
+      {% endif %}
+    </div>
+    {% if company.website %}
+      <a class="btn btn-outline-primary"
+         href="{{ company.website }}"
+         target="_blank"
+         rel="noopener">Company website</a>
+    {% endif %}
+  </div>
+  {% if company.description %}<p>{{ company.description }}</p>{% endif %}
+  <h2 class="h4 mt-4">Jobs ({{ jobs|length }})</h2>
+  <div class="list-group">
+    {% for job in jobs %}
+      <article class="list-group-item">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+          <div>
+            <h3 class="h5 mb-1">
+              <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
+            </h3>
+            <p class="mb-1 text-muted">
+              Applied {{ job.applied_date|date:"F j, Y" }}
+              {% if job.location %}&middot; {{ job.location }}{% endif %}
+            </p>
+          </div>
+          <span class="badge text-bg-secondary">{{ job.get_status_display }}</span>
+        </div>
+        {% if job.description %}
+          <p class="mb-2 mt-2">{{ job.description|truncatewords:35 }}</p>
+        {% endif %}
+        <div class="small text-muted">
+          {{ job.interviews.all|length }} interview{{ job.interviews.all|length|pluralize }} logged
+          {% if job.application_link %}
+            &middot; <a href="{{ job.application_link }}"
+    target="_blank"
+    rel="noopener">Open posting</a>
+          {% endif %}
+        </div>
+      </article>
+    {% empty %}
+      <p class="text-muted">No jobs have been added for this company yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
