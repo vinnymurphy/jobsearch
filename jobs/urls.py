@@ -1,5 +1,6 @@
 from .unemployment import JobSearchReportView
 from .views import (
+    CompanyDetailView,
     InterviewDetailView,
     JobCreateView,
     JobDetailView,
@@ -15,6 +16,11 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path("", dashboard_view, name="dashboard"),
+    path(
+        "company/<int:pk>/",
+        CompanyDetailView.as_view(),
+        name="company_detail",
+    ),
     path(
         "interview/<int:pk>/",
         InterviewDetailView.as_view(),

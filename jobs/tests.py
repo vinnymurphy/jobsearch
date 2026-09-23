@@ -89,6 +89,42 @@ class JobPerformanceTest(TestCase):
         self.assertContains(response, "labels: labels,")
         self.assertContains(response, "data: counts,")
 
+    def test_dashboard_links_each_company_to_its_job_list(self):
+        response = self.client.get(reverse("dashboard"))
+
+        company_url = reverse(
+            "company_detail", kwargs={"pk": self.company.pk}
+        )
+        self.assertContains(response, f'href="{company_url}"')
+        self.assertContains(response, "companyUrls")
+
+    def test_dashboard_companies_are_alphabetized(self):
+        amazon = Company.objects.create(name="amazon")
+        zoom = Company.objects.create(name="Zoom")
+        Job.objects.create(title="Cloud role", company=amazon)
+        Job.objects.create(title="Video role", company=zoom)
+
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertContains(
+            response,
+            '<script id="job-chart-labels" type="application/json">'
+            '["amazon", "Cisco", "Zoom"]</script>',
+        )
+
+    def test_company_detail_only_shows_its_jobs(self):
+        other_company = Company.objects.create(name="Other Corp")
+        matching_job = Job.objects.create(
+            title="Cloud Engineer", company=self.company
+        )
+        Job.objects.create(title="Private Role", company=other_company)
+
+        response = self.client.get(self.company.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, matching_job.title)
+        self.assertNotContains(response, "Private Role")
+
     def test_calendar_uses_event_pill_markup(self):
         job = Job.objects.create(
             title="Global Solutions Architect",
