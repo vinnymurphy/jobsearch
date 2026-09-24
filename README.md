@@ -1,9 +1,20 @@
 # JobSearch
 
-A streamlined Django application to track the lifecycle of your job search,
-from initial application to final interview.
+JobSearch is a streamlined Django application for tracking the lifecycle of a job search, from the initial application through final interviews and follow-ups.
+
+It helps you:
+- track companies and roles you’ve applied to
+- monitor interview stages and interviewer details
+- maintain a local-first, privacy-focused job search workflow
+- generate PDF exports for weekly unemployment reporting and dashboard summaries
+
+## Overview
+
+This project is designed for a local Fedora workstation and emphasizes privacy, local data control, and minimal operational overhead. It is built to keep job-search data on-device while still providing useful reporting and export capabilities.
 
 ## 🚀 Getting Started
+
+This project is designed for a local Fedora workstation and emphasizes privacy, local data control, and minimal operational overhead. It is built to keep job-search data on-device while still providing useful reporting and export capabilities.Getting Started
 
 ### Prerequisites (Fedora)
 To support **PDF Exporting** via WeasyPrint, install the following system
