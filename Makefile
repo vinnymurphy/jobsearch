@@ -20,7 +20,7 @@ RUFF          := $(BIN)/ruff
 TIMESTAMP     := $(shell date +%F_%H%M%S)
 CELERY_WORKER := $(CELERY) -A config worker -l info
 
-.PHONY: help setup install migrate run test shell clean backup restore format lint all worker redis .DEFAULT_GOAL
+.PHONY: help setup install migrate migrate-fresh run test shell db-shell clean backup restore format lint all worker redis check-tools .DEFAULT_GOAL
 
 .DEFAULT_GOAL := help
 
@@ -48,18 +48,31 @@ run: redis ## Start Django server and background Celery worker together
 	$(CELERY_WORKER) &
 	@echo "Starting Django development server..."
 	$(MANAGE) runserver 127.0.0.1:8080
+
 help: ## Display this help screen
 	@perl -ne 'printf "\033[36m%-15s\033[0m %s\n", $$1, $$2 if /^([a-zA-Z_-]+):.*##\s*(.*)$$/' $(MAKEFILE_LIST) | sort
 
-setup:  ## Create venv and install dependencies
+setup: ## Create venv and install dependencies
 	@echo "[INFO] Initializing Virtual Environment..."
 	python3 -m venv $(VENV) && \
 	$(PIP) install --upgrade pip && \
 	$(PIP) install -r requirements.txt
 	@echo "[SUCCESS] Environment ready. Run 'make migrate' next."
 
+install: setup ## Alias for setup
+
 migrate: ## Generate and apply database migrations
 	$(MANAGE) makemigrations
+	$(MANAGE) migrate
+
+migrate-fresh: ## Flush the database and apply migrations from scratch
+	@echo "WARNING: This will delete all data from the database."
+	@read -r -p "Continue? [y/N] " answer; \
+	case "$$answer" in \
+		y|Y|yes|YES) ;; \
+		*) echo "Aborted."; exit 1 ;; \
+	esac
+	$(MANAGE) flush --no-input
 	$(MANAGE) migrate
 
 test: ## Run the test suite (Performance & Logic)
@@ -68,10 +81,13 @@ test: ## Run the test suite (Performance & Logic)
 shell: ## Open the Django interactive shell
 	$(MANAGE) shell $(ARGS)
 
+db-shell: ## Open the database shell
+	$(MANAGE) dbshell
+
 clean: ## Clean .pyc, __pycache__ files and emacs backup files
 	find . -name "*.py[co]" -delete
 	find . -name "__pycache__" -delete
-	find . -name "*~" -delete"
+	find . -name "*~" -delete
 
 backup: ## Export database to timestamped JSON
 	@mkdir -p $(BACKUP_DIR)
@@ -84,29 +100,27 @@ restore: ## Load data from the most recent backup file
 	@echo "BUILD STATUS: Restoring latest data state..."
 	@LATEST=$$(ls -t $(BACKUP_DIR)/*.json 2>/dev/null | head -1) && \
 	[ -n "$$LATEST" ] && \
-	@$(MANAGE) loaddata $$LATEST && \
-	@echo "RESULT: Database synchronized with $$LATEST" || \
-	@echo "ERROR: No backup files found in $(BACKUP_DIR)"
+	$(MANAGE) loaddata "$$LATEST" && \
+	echo "RESULT: Database synchronized with $$LATEST" || \
+	echo "ERROR: No backup files found in $(BACKUP_DIR)"
 
-
-check-tools:  ## Check if required tools (ruff and djlint) are installed
+check-tools: ## Check if required tools (ruff and djlint) are installed
 	@command -v $(RUFF) >/dev/null || { echo "ERROR: $(RUFF) not installed"; exit 1; }
 	@command -v $(DJLINT) >/dev/null || { echo "ERROR: $(DJLINT) not installed"; exit 1; }
 
-format: check-tools  ## Format codebase with Ruff and djlint
+format: check-tools ## Format codebase with Ruff and djlint
 	@echo "BUILD STATUS: Formatting with Ruff and djlint..."
 	@$(RUFF) format . && \
 	$(RUFF) check --fix . && \
 	$(DJLINT) . --reformat
 	@echo "RESULT: Codebase formatted and auto-fixed."
 
-
-lint:  ## Run lint-like check on the code base
+lint: check-tools ## Run lint-like check on the code base
 	@echo "BUILD STATUS: Linting with Ruff and djlint..."
 	@$(RUFF) check . && \
 	$(DJLINT) . --check
 	@echo "RESULT: Linting complete."
 
 # The "Safety Suite" - Run everything in one go
-check: format test backup  ## Safety Suite where we run format, test, backup
+check: format test backup ## Safety Suite where we run format, test, backup
 	@echo "PIPELINE STATUS: ALL CHECKS PASSED"
